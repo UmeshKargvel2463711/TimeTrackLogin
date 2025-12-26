@@ -1,1 +1,44 @@
-<p>admin works!</p>
+<div class="admin-shell">
+    <header class="navbar">
+        <div class="nav-left">
+            <div class="logo-container">
+                <span class="material-icons">timer</span>
+            </div>
+            <div class="brand-info">
+                <h1 class="brand-name">TimeTrack</h1>
+                <p class="sub-brand">ADMIN DASHBOARD</p>
+            </div>
+        </div>
+
+        <nav class="nav-center">
+            <div class="pill-nav">
+                <a routerLink="dashboard" routerLinkActive="active" class="nav-link">
+                    <span class="material-icons">people</span> Logs
+                </a>
+                <a routerLink="generatereports" routerLinkActive="active" class="nav-link">
+                    <span class="material-icons">analytics</span> Insights
+                </a>
+                <a routerLink="system-config" routerLinkActive="active" class="nav-link">
+                    <span class="material-icons">settings</span> Settings
+                </a>
+            </div>
+        </nav>
+
+        <div class="nav-right">
+            <div class="user-pill">
+                <div class="avatar">h</div>
+                <div class="user-details">
+                    <span class="user-id">harsh</span>
+                    <span class="user-dept">IT</span>
+                </div>
+            </div>
+            <button class="logout-pill">
+                <span class="material-icons">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="content-body">
+        <router-outlet></router-outlet>
+    </main>
+</div>

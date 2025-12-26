@@ -1,1 +1,50 @@
-<p>dashboard works!</p>
+<div class="dashboard-wrapper">
+    <div class="stats-grid">
+        @for (item of stats; track item.label) {
+        <div class="card">
+            <div class="card-body">
+                <span class="card-label">{{ item.label }}</span>
+                <h2 class="card-value">{{ item.value }}</h2>
+            </div>
+            <div class="card-icon" [ngClass]="item.color">
+                <span class="material-icons">{{ item.icon }}</span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <h2>User Management</h2>
+            <button class="add-btn">+ Add User</button>
+        </div>
+
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>EMAIL</th>
+                    <th>ROLE</th>
+                    <th>DEPARTMENT</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (user of users; track user.email) {
+                <tr>
+                    <td><strong>{{ user.name }}</strong></td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>{{ user.department }}</td>
+                    <td><span class="status-pill">{{ user.status }}</span></td>
+                    <td class="action-icons">
+                        <span class="material-icons edit">edit</span>
+                        <span class="material-icons delete">delete</span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
