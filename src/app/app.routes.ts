@@ -14,6 +14,8 @@ export const routes: Routes = [
     { path: 'admin/dashboard', component: DashboardComponent }, 
     { path: 'manager', component:ManagerComponent},
   { path: 'employee/dashboardemployee', component: DashboardemployeeComponent },
+  { path: 'manager', component: ManagerComponent },
+  { path: '', redirectTo: '/', pathMatch: 'full' } // Default to Hero
 ];
 
 @NgModule({
