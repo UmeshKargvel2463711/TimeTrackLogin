@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-tasksassigned',
-  imports: [],
+  selector: 'app-tasks',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './tasksassigned.component.html',
-  styleUrl: './tasksassigned.component.css'
+  styleUrls: ['./tasksassigned.component.css']
 })
-export class TasksassignedComponent {
-
+export class TasksComponent {
+  @Input() tasks: any[] = [];
 }

@@ -1,0 +1,25 @@
+/* Summary Icon Colors */
+.icon-box { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.icon-blue { background-color: #eff6ff; color: #3b82f6; }
+.icon-green { background-color: #f0fdf4; color: #22c55e; }
+.icon-purple { background-color: #faf5ff; color: #a855f7; }
+
+/* Employee Avatar Circle */
+.avatar-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 32px;
+  height: 32px;
+  background-color: #eef2ff;
+  color: #6366f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.card { border-radius: 10px; }
+.table thead th { font-weight: 600; text-transform: none; padding: 12px; }

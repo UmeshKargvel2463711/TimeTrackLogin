@@ -1,1 +1,14 @@
-<p>tasksassigned works!</p>
+<div class="task-grid fade-in">
+    <div *ngFor="let task of tasks" class="task-card card">
+        <div class="task-row">
+            <strong>{{task.title}}</strong>
+            <span class="pill" [attr.data-status]="task.status">{{task.status}}</span>
+        </div>
+        <div class="progress-info">
+            <div class="labels"><span>Progress</span><span>{{task.progress}}%</span></div>
+            <div class="progress-bg">
+                <div class="progress-fill" [style.width.%]="task.progress"></div>
+            </div>
+        </div>
+    </div>
+</div>

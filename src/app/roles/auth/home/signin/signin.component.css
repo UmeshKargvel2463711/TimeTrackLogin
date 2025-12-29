@@ -1,0 +1,75 @@
+.signin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f7f6;
+}
+ 
+.signin-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+ 
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+ 
+.form-group {
+  margin-bottom: 22px; /* Equal gaps as requested */
+  display: flex;
+  flex-direction: column;
+}
+ 
+label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+ 
+/* Change this part in your code */
+input, select {
+  height: 45px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  width: 100%;           /* This makes the dropdown wide */
+  box-sizing: border-box; /* This keeps everything perfectly aligned */
+}
+ 
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff; /* Blue button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+}
+ 
+.submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+ 
+.error {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 5px;
+  min-height: 15px;
+}
+ 
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}

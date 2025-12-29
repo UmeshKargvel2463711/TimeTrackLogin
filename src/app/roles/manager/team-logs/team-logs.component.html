@@ -1,1 +1,87 @@
-<p>team-logs works!</p>
+<div class="container-fluid p-0">
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div>
+          <small class="text-muted d-block mb-1">Total Hours</small>
+          <h5 class="fw-bold mb-0">{{ totalHours }}</h5>
+        </div>
+        <div class="icon-box icon-blue rounded-circle p-2">
+          <i class="bi bi-clock"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div>
+          <small class="text-muted d-block mb-1">Average per Day</small>
+          <h5 class="fw-bold mb-0">{{ averagePerDay }}</h5>
+        </div>
+        <div class="icon-box icon-green rounded-circle p-2">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div>
+          <small class="text-muted d-block mb-1">Total Entries</small>
+          <h5 class="fw-bold mb-0">{{ totalEntries }}</h5>
+        </div>
+        <div class="icon-box icon-purple rounded-circle p-2">
+          <i class="bi bi-calendar3"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold mb-0">Team Time Logs</h5>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm w-auto"><option>All Team Members</option></select>
+        <select class="form-select form-select-sm w-auto"><option>This Week</option></select>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4" *ngFor="let member of teamMembers">
+        <div class="card border p-3 position-relative">
+          <h6 class="fw-bold mb-1">{{ member.name }}</h6>
+          <small class="text-muted d-block mb-3">{{ member.email }}</small>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">Total Hours:</span>
+            <span class="fw-bold">{{ member.hours }}</span>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-muted">Days Logged:</span>
+            <span class="fw-bold">{{ member.days }}</span>
+          </div>
+          <div class="avatar-badge">{{ member.initial }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle text-center small fw-bold">
+        <thead class="table-light text-muted border-bottom">
+          <tr>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Break (min)</th>
+            <th>Total Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" class="py-5 text-muted fw-normal">No time logs found for the selected filters</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

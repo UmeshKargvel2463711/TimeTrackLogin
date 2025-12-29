@@ -1,1 +1,79 @@
-<p>manager works!</p>
+<div class="dashboard-wrapper py-4 px-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border">
+    <div class="d-flex align-items-center">
+      <div class="bg-primary rounded p-2 me-2 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <i class="bi bi-clock-history fs-5"></i>
+      </div>
+      <div>
+        <h6 class="mb-0 fw-bold">TimeTrack</h6>
+        <small class="text-muted">Manager Dashboard</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center">
+      <div class="text-end me-3">
+        <p class="mb-0 fw-bold small">Sarah Johnson</p>
+        <small class="text-muted" style="font-size: 11px;">Engineering</small>
+      </div>
+      <button class="btn btn-sm text-muted"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card p-3 border-0 shadow-sm stat-card">
+        <small class="text-muted fw-medium">Team Members</small>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <h4 class="fw-bold mb-0">3</h4>
+          <div class="icon-shape bg-light-blue"><i class="bi bi-people-fill text-primary"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 border-0 shadow-sm stat-card">
+        <small class="text-muted fw-medium">Active Tasks</small>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <h4 class="fw-bold mb-0">2</h4>
+          <div class="icon-shape bg-light-green"><i class="bi bi-check2-square text-success"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 border-0 shadow-sm stat-card">
+        <small class="text-muted fw-medium">Team Hours (Today)</small>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <h4 class="fw-bold mb-0">0.0</h4>
+          <div class="icon-shape bg-light-purple"><i class="bi bi-clock text-purple"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 border-0 shadow-sm stat-card">
+        <small class="text-muted fw-medium">Completion Rate</small>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <h4 class="fw-bold mb-0">20%</h4>
+          <div class="icon-shape bg-light-yellow"><i class="bi bi-graph-up-arrow text-warning"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center mb-4">
+    <div class="tab-container p-1 shadow-sm bg-white rounded border">
+      <button class="btn px-4 py-2 border-0" [ngClass]="tab === 'logs' ? 'btn-primary active-tab shadow-sm' : 'text-muted'" (click)="tab = 'logs'">
+        <i class="bi bi-clock me-2"></i> Team Time Logs
+      </button>
+      <button class="btn px-4 py-2 border-0" [ngClass]="tab === 'tasks' ? 'btn-primary active-tab shadow-sm' : 'text-muted'" (click)="tab = 'tasks'">
+        <i class="bi bi-list-check me-2"></i> Task Management
+      </button>
+      <button class="btn px-4 py-2 border-0" [ngClass]="tab === 'analytics' ? 'btn-primary active-tab shadow-sm' : 'text-muted'" (click)="tab = 'analytics'">
+        <i class="bi bi-graph-up me-2"></i> Team Analytics
+      </button>
+    </div>
+  </div>
+
+  <div [ngSwitch]="tab">
+    <app-team-logs *ngSwitchCase="'logs'"></app-team-logs>
+    <app-task-management *ngSwitchCase="'tasks'"></app-task-management>
+    <app-team-analytics *ngSwitchCase="'analytics'"></app-team-analytics>
+  </div>
+</div>  

@@ -1,1 +1,35 @@
-<p>dashboardemployee works!</p>
+<div class="dashboard-wrapper">
+    <header class="navbar-modern">
+        <div class="nav-left">
+            <div class="logo-circle">🕒</div>
+            <div class="brand-info">
+                <h1 class="brand-name">TimeTrack</h1>
+                <span class="brand-tag">Employee Dashboard</span>
+            </div>
+        </div>
+
+        <nav class="nav-center">
+            <button class="nav-item" [class.active]="activeTab() === 'logging'" (click)="setTab('logging')">🕒
+                Logs</button>
+            <button class="nav-item" [class.active]="activeTab() === 'tasks'" (click)="setTab('tasks')">📋
+                Tasks</button>
+            <button class="nav-item" [class.active]="activeTab() === 'productivity'" (click)="setTab('productivity')">📈
+                Insights</button>
+        </nav>
+
+        <div class="nav-right">
+            <div class="user-pill">
+                <div class="user-avatar">{{ authService.currentUser()?.name?.charAt(0) }}</div>
+                <span class="u-name">{{ authService.currentUser()?.name }}</span>
+            </div>
+            <button class="btn-logout" (click)="logout()">↪</button>
+        </div>
+    </header>
+
+    <div [ngSwitch]="activeTab()" class="tab-content">
+        <app-time-logging *ngSwitchCase="'logging'" [logs]="timeLogs()" [weeklyHours]="weeklyHours()"
+            (onAddLog)="showModal.set(true)"></app-time-logging>
+        <app-tasks *ngSwitchCase="'tasks'" [tasks]="detailedTasks()"></app-tasks>
+        <app-productivity *ngSwitchCase="'productivity'"></app-productivity>
+    </div>
+</div>

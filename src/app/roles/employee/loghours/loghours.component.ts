@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-loghours',
-  imports: [],
+  selector: 'app-time-logging',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './loghours.component.html',
-  styleUrl: './loghours.component.css'
+  styleUrls: ['./loghours.component.css']
 })
-export class LoghoursComponent {
-
+export class LogHoursComponent {
+  @Input() logs: any[] = [];
+  @Input() weeklyHours: number = 0;
+  @Output() onAddLog = new EventEmitter<void>();
 }
