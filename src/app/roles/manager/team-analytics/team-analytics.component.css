@@ -1,0 +1,13 @@
+.icon-blue { background-color: #eef2ff; color: #6366f1; }
+.icon-green { background-color: #f0fdf4; color: #22c55e; }
+.icon-purple { background-color: #faf5ff; color: #a855f7; }
+.icon-yellow { background-color: #fffbeb; color: #f59e0b; }
+
+.progress-bar { background-color: #6366f1 !important; }
+
+.alert { border-radius: 10px; }
+.alert-primary { color: #4338ca; }
+.alert-success { color: #15803d; }
+.alert-warning { color: #a16207; }
+
+canvas { max-height: 250px; width: 100% !important; }

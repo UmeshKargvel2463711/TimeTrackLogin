@@ -1,1 +1,94 @@
-<p>team-analytics works!</p>
+<div class="container-fluid p-0">
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div><small class="text-muted d-block">Total Team Hours</small><h5 class="fw-bold mb-0">39.3 hrs</h5></div>
+        <div class="icon-box icon-blue rounded p-2"><i class="bi bi-people"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div><small class="text-muted d-block">Avg Hours/Member</small><h5 class="fw-bold mb-0">13.1 hrs</h5></div>
+        <div class="icon-box icon-green rounded p-2"><i class="bi bi-graph-up"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div><small class="text-muted d-block">Completion Rate</small><h5 class="fw-bold mb-0">20%</h5></div>
+        <div class="icon-box icon-purple rounded p-2"><i class="bi bi-bullseye"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row justify-content-between align-items-center">
+        <div><small class="text-muted d-block">Tasks Completed</small><h5 class="fw-bold mb-0">1 / 5</h5></div>
+        <div class="icon-box icon-yellow rounded p-2"><i class="bi bi-award"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h6 class="fw-bold mb-4">Team Hours Trend (Last 7 Days)</h6>
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h6 class="fw-bold mb-4">Hours by Team Member</h6>
+        <canvas id="memberChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4 mb-4">
+    <h6 class="fw-bold mb-4">Team Member Performance</h6>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead class="table-light small text-muted text-uppercase">
+          <tr>
+            <th>Member</th><th>Total Hours</th><th>Tasks Completed</th><th>Efficiency Score</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of teamPerformance">
+            <td class="fw-bold">{{ m.name }}</td>
+            <td>{{ m.hours }} hrs</td>
+            <td>{{ m.tasks }} tasks</td>
+            <td style="width: 30%;">
+              <div class="d-flex align-items-center">
+                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                  <div class="progress-bar bg-primary" [style.width]="m.efficiency + '%'"></div>
+                </div>
+                <small class="text-muted">{{ m.efficiency }}%</small>
+              </div>
+            </td>
+            <td>
+              <span class="badge rounded-pill" 
+                [ngClass]="m.status === 'Excellent' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'">
+                {{ m.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4">
+    <h6 class="fw-bold mb-3">Team Insights</h6>
+    <div class="alert alert-primary d-flex align-items-center mb-2 border-0 bg-primary-subtle py-2">
+      <i class="bi bi-graph-up me-3 fs-5"></i>
+      <div><small class="fw-bold d-block">Team Performance</small><small>Your team has logged an average of 13.1 hours per member</small></div>
+    </div>
+    <div class="alert alert-success d-flex align-items-center mb-2 border-0 bg-success-subtle py-2">
+      <i class="bi bi-check-circle me-3 fs-5"></i>
+      <div><small class="fw-bold d-block">Task Completion</small><small>20% of assigned tasks have been completed</small></div>
+    </div>
+    <div class="alert alert-warning d-flex align-items-center border-0 bg-warning-subtle py-2">
+      <i class="bi bi-exclamation-triangle me-3 fs-5"></i>
+      <div><small class="fw-bold d-block">Action Required</small><small>Some team members may need additional support or task reassignment</small></div>
+    </div>
+    
+  </div>
+</div>
