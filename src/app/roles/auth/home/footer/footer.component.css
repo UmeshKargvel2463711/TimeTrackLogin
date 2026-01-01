@@ -1,0 +1,96 @@
+
+.footer {
+  background-color: #0a192f; /* Matching your dark Hero section */
+  color: #ccd6f6;
+  padding: 60px 0 20px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  color: #ffffff;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.status-indicator {
+  margin-top: 15px;
+  font-size: 0.85rem;
+  color: #38bdf8; /* Your Navbar Sky Blue */
+}
+
+.dot {
+  height: 8px;
+  width: 8px;
+  background-color: #10b981; /* Success Green */
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.footer-links h3, .footer-info h3 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.footer-links li:hover {
+  color: #38bdf8;
+}
+
+.footer-info p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.warning-text {
+  margin-top: 15px;
+  color: #94a3b8;
+  border-left: 3px solid #38bdf8;
+  padding-left: 10px;
+}
+
+.footer-bottom {
+  border-top: 1px solid #233554;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #8892b0;
+}
+
+.footer-meta span {
+  margin-left: 15px;
+}
+
+/* Responsive Grid */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
