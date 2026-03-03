@@ -38,7 +38,6 @@ export class SigninComponent {
       // Call backend API for all users (including Admin)
       this.authService.loginAsync(email, enteredPassword).subscribe({
         next: (response: any) => {
-          console.log('🔐 Login response:', response);
           // API returns { success, message, data: { userId, name, email, role, department, token, tokenExpiration } }
           let user = response.data || response;
 
@@ -50,7 +49,6 @@ export class SigninComponent {
           // Normalize user ID - backend returns 'userId', but code expects 'id'
           if (user.userId && !user.id) {
             user.id = user.userId;
-            console.log('✅ Normalized user.id from userId:', user.id);
           }
 
           // Log token for debugging
@@ -76,7 +74,6 @@ export class SigninComponent {
           this.authService.navigateToDashboard(user.role);
         },
         error: (err: any) => {
-          console.error('Login failed:', err);
           const message = err.error?.message || err.error || 'Invalid email or password.';
           this.notificationService.error(message, 4000);
         }
@@ -85,3 +82,4 @@ export class SigninComponent {
   }
 
 }
+

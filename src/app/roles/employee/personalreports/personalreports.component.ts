@@ -51,7 +51,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
   private pieChartInstance: Chart | null = null;
 
   ngOnInit() {
-    console.log('🔄 PersonalreportsComponent initialized - Loading all data');
     // Load data immediately and ensure it displays
     this.loadProductivityData();
     // ALWAYS load time logs to ensure total hours is calculated
@@ -60,7 +59,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     // Force refresh after a short delay to ensure data is loaded
     setTimeout(() => {
       if (this.totalHoursLogged === 0) {
-        console.log('⚠️ No data loaded, forcing refresh...');
         this.loadTimeLogsForTotalHours();
       }
     }, 1000);
@@ -114,11 +112,8 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
   private loadTimeLogsForTotalHours() {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
-      console.warn('⚠️ No current user found, cannot load time logs');
       return;
     }
-
-    console.log('📊 Loading time logs for last 7 days calculation');
     
     // Calculate date range for last 7 days
     const today = new Date();
@@ -129,20 +124,16 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     const startDate = sevenDaysAgo.toISOString();
     const endDate = today.toISOString();
     
-    console.log('📊 Fetching time logs from', startDate, 'to', endDate);
-    
     // Use getUserTimeLogs with date range to get last 7 days data
     this.timeLogService.getUserTimeLogs(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
           if (!response || !response.success || !response.data) {
-            console.log('📊 No time logs found in API response');
             return;
           }
 
           const logs = response.data;
-          console.log('📊 Time logs received:', logs.length);
 
           if (logs.length > 0) {
             // Calculate total hours for last 7 days
@@ -155,13 +146,11 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
             // Calculate daily breakdown for chart
             this.calculateDailyHours(logs);
           } else {
-            console.log('📊 No time logs in last 7 days');
             this.totalHoursLogged = 0;
             this.initializeEmptyDailyHours();
           }
         },
         error: (err: any) => {
-          console.error('❌ Error loading time logs:', err);
           this.totalHoursLogged = 0;
           this.initializeEmptyDailyHours();
         }
@@ -196,8 +185,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       
       this.lastSevenDaysHours.push(parseFloat(dayHours.toFixed(2)));
     }
-    
-    console.log('📊 Daily hours breakdown:', this.lastSevenDaysHours);
     
     // Calculate weekly average
     const daysWithLogs = this.lastSevenDaysHours.filter(h => h > 0).length;
@@ -237,46 +224,17 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
   private loadProductivityData() {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
-      console.warn('No current user found');
       return;
     }
 
-    console.log('📊 PersonalreportsComponent.loadProductivityData - Starting to load productivity data for:', currentUser.fullName);
-
-    // First try to load from Productivity API
-    console.log('📊 PersonalreportsComponent - Fetching productivity from API: /api/Productivity');
-    this.taskService.getProductivity()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-      next: (productivityData: any) => {
-        console.log('✅ PersonalreportsComponent - API productivity data loaded successfully:', productivityData);
-        
-        // Verify the response has actual data
-        if (productivityData && Object.keys(productivityData).length > 0) {
-          this.applyProductivityData(productivityData);
-        } else {
-          console.warn('⚠️ PersonalreportsComponent - API returned empty response, using fallback');
-          this.loadProductivityDataFallback(currentUser);
-        }
-      },
-      error: (err) => {
-        console.warn('⚠️ PersonalreportsComponent - Productivity API failed, falling back to local calculation:', err);
-        console.warn('Error details:', {
-          status: err.status,
-          message: err.message,
-          statusText: err.statusText
-        });
-        // Fallback to previous calculation method
-        this.loadProductivityDataFallback(currentUser);
-      }
-    });
+    // Load productivity data from task history
+    this.loadProductivityDataFallback(currentUser);
   }
 
   /**
    * Apply productivity data from API
    */
   private applyProductivityData(data: any) {
-    console.log('📊 PersonalreportsComponent.applyProductivityData - Raw API response:', data);
     
     this.totalHoursLogged = parseFloat(data.totalHoursLogged) || 0;
     this.taskCompletionRate = parseInt(data.taskCompletionRate) || 0;
@@ -293,21 +251,9 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     this.pendingTasks = parseInt(data.pendingTasks) || 0;
     this.weeklyAverage = parseFloat(data.weeklyAverage) || 0;
 
-    console.log('📊 PersonalreportsComponent.applyProductivityData - Parsed values:', {
-      totalHoursLogged: this.totalHoursLogged,
-      taskCompletionRate: this.taskCompletionRate,
-      efficiencyScore: this.efficiencyScore,
-      completedTasks: this.completedTasks,
-      totalTasks: this.totalTasks,
-      inProgressTasks: this.inProgressTasks,
-      pendingTasks: this.pendingTasks,
-      weeklyAverage: this.weeklyAverage
-    });
-
     // Parse chart data if available
     if (data.dailyHours && Array.isArray(data.dailyHours)) {
       this.lastSevenDaysHours = data.dailyHours.map((h: any) => parseFloat(h) || 0);
-      console.log('📊 Daily hours data:', this.lastSevenDaysHours);
     }
 
     if (data.taskDistribution) {
@@ -318,7 +264,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
         inProgress: parseInt(data.taskDistribution.inProgress) || 0,
         pending: parseInt(data.taskDistribution.pending) || 0
       };
-      console.log('📊 Task distribution:', this.taskStatusData);
     } else {
       // If no taskDistribution from API, use the counts we calculated
       this.taskStatusData = {
@@ -337,8 +282,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       this.lastSevenDaysLabels.push(dateStr);
     }
-
-    console.log('📊 Productivity data fully applied and ready for display');
   }
 
   /**
@@ -346,14 +289,12 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * REMOVED - only show real data now
    */
   private loadDemoData() {
-    console.log('⏭️ Demo data loading skipped - showing real data only');
   }
 
   /**
    * Fallback: Load productivity data using local calculation
    */
   private loadProductivityDataFallback(currentUser: any) {
-    console.log('⚠️ Using fallback method to load productivity data');
     
     // Load time logs
     this.timeLogService.getLogs()
@@ -365,13 +306,10 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
             log.employee === currentUser.fullName || log.employeeId === currentUser.id
           );
 
-          console.log('📝 Fallback - Time logs found:', myLogs.length);
-
           // Calculate total hours and weekly data
           this.calculateTimeMetrics(myLogs);
         },
         error: (err) => {
-          console.error('❌ Error loading time logs:', err);
           // Show demo data if no real data available
           this.loadDemoData();
         }
@@ -382,12 +320,10 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (tasks: Task[]) => {
-          console.log('📝 Fallback - Tasks found:', tasks.length);
           // Calculate task metrics
           this.calculateTaskMetrics(tasks);
         },
         error: (err) => {
-          console.error('❌ Error loading tasks:', err);
           // Show demo data if no real data available
           if (this.totalHoursLogged === 0 && this.totalTasks === 0) {
             this.loadDemoData();
@@ -401,7 +337,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    */
   private calculateTimeMetrics(logs: any[]) {
     if (logs.length === 0) {
-      console.warn('⚠️ No time logs found. Showing 0 values.');
       this.totalHoursLogged = 0;
       this.weeklyAverage = 0;
       // Don't show demo data - show real empty state
@@ -438,8 +373,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     const daysWithLogs = new Set(logs.map(log => new Date(log.date).toDateString())).size;
     this.weeklyAverage = daysWithLogs > 0 ? parseFloat((this.totalHoursLogged / daysWithLogs).toFixed(1)) : 0;
 
-    console.log('Time Metrics:', { totalHours: this.totalHoursLogged, weeklyAverage: this.weeklyAverage });
-
     // Refresh charts if there's data
     if (this.lastSevenDaysHours.length > 0) {
       this.refreshCharts();
@@ -451,7 +384,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    */
   private calculateTaskMetrics(tasks: any[]) {
     if (tasks.length === 0) {
-      console.warn('⚠️ No tasks found. Showing 0 values.');
       this.taskCompletionRate = 0;
       this.efficiencyScore = 0;
       this.totalTasks = 0;
@@ -485,12 +417,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       pending: this.pendingTasks
     };
 
-    console.log('Task Metrics:', { 
-      completionRate: this.taskCompletionRate, 
-      efficiencyScore: this.efficiencyScore,
-      taskStatus: this.taskStatusData
-    });
-
     // Refresh charts with new data
     if (this.totalTasks > 0) {
       this.refreshCharts();
@@ -501,7 +427,6 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Refresh charts after data is loaded
    */
   private refreshCharts() {
-    console.log('🔄 Refreshing charts with new data');
     
     // Destroy existing charts if they exist
     if (this.barChartInstance) {
@@ -524,16 +449,13 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Update chart data without recreating the charts
    */
   private updateChartData() {
-    console.log('🔄 Updating chart data');
     
     // Update bar chart if it exists
     if (this.barChartInstance) {
       this.barChartInstance.data.labels = this.lastSevenDaysLabels;
       this.barChartInstance.data.datasets[0].data = this.lastSevenDaysHours;
       this.barChartInstance.update();
-      console.log('✅ Bar chart updated with data:', this.lastSevenDaysHours);
     } else {
-      console.log('⚠️ Bar chart not initialized yet');
     }
     
     // Update pie chart if it exists
@@ -544,9 +466,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
         this.taskStatusData.pending
       ];
       this.pieChartInstance.update();
-      console.log('✅ Pie chart updated with data:', this.taskStatusData);
     } else {
-      console.log('⚠️ Pie chart not initialized yet');
     }
   }
 
@@ -555,11 +475,8 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    */
   createBarChart() {
     if (!this.barChartCanvas) {
-      console.warn('⚠️ Bar chart canvas not found');
       return;
     }
-
-    console.log('📊 Creating bar chart with data:', this.lastSevenDaysHours);
     
     // Initialize with empty data if not yet loaded
     const labels = this.lastSevenDaysLabels.length > 0 ? this.lastSevenDaysLabels : ['Loading...'];
@@ -606,11 +523,8 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    */
   createPieChart() {
     if (!this.pieChartCanvas) {
-      console.warn('⚠️ Pie chart canvas not found');
       return;
     }
-
-    console.log('📊 Creating pie chart with data:', this.taskStatusData);
 
     this.pieChartInstance = new Chart(this.pieChartCanvas.nativeElement, {
       type: 'doughnut',
@@ -653,7 +567,5 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       this.pieChartInstance.destroy();
       this.pieChartInstance = null;
     }
-    
-    console.log('🧹 PersonalreportsComponent cleaned up');
   }
 }

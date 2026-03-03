@@ -42,7 +42,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
   showTimeLogsModal = false;  // For time logs view
   tasks: any[] = [];
   pendingApprovalTasks: any[] = [];
-  overdueTasks: any[] = [];
   teamMembers: TeamMember[] = [];
   taskSubmissions: TaskSubmission[] = [];
   currentManagerName: string = '';
@@ -103,11 +102,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         if (this.teamMembers.length > 0 && !this.newTask.assignedTo) {
           this.newTask.assignedTo = this.teamMembers[0].userId;
         }
-
-        console.log('Team members loaded from API:', this.teamMembers);
       },
       error: (err) => {
-        console.error('Error loading team members:', err);
       }
     });
 
@@ -118,22 +114,17 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
 
     // Subscribe to tasks and dynamically update when they change
     this.dataService.tasks$.pipe(takeUntil(this.destroy$)).subscribe((data: any[]) => {
-      console.log('Tasks updated:', data);
       this.tasks = data;
     });
 
     // Subscribe to task submissions
     this.submissionService.getSubmissions().pipe(takeUntil(this.destroy$)).subscribe((submissions: TaskSubmission[]) => {
-      console.log('📝 Manager - All submissions from service:', submissions);
       const teamMemberNames = this.teamMembers.map(m => m.name);
-      console.log('👥 Manager - Team member names:', teamMemberNames);
       this.taskSubmissions = this.submissionService.getTeamSubmissions(teamMemberNames);
-      console.log('✅ Manager - Filtered team submissions:', this.taskSubmissions);
     });
 
     // Periodically refresh submissions to ensure we get latest updates
     setInterval(() => {
-      console.log('🔄 Manager - Refreshing submissions...');
       const teamMemberNames = this.teamMembers.map(m => m.name);
       this.taskSubmissions = this.submissionService.getTeamSubmissions(teamMemberNames);
     }, 5000); // Refresh every 5 seconds
@@ -197,11 +188,9 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
       this.apiService.getTasksByStatus(status).pipe(takeUntil(this.destroy$)).subscribe({
         next: (response: any) => {
           const tasks = response?.data || response || [];
-          console.log(`Tasks filtered by status ${status}:`, tasks);
           this.tasks = tasks;
         },
         error: (err) => {
-          console.error('Error filtering tasks by status:', err);
         }
       });
     }
@@ -218,11 +207,9 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
       this.apiService.getTasksByEmployee(employeeId).pipe(takeUntil(this.destroy$)).subscribe({
         next: (response: any) => {
           const tasks = response?.data || response || [];
-          console.log(`Tasks filtered by employee ${employeeId}:`, tasks);
           this.tasks = tasks;
         },
         error: (err) => {
-          console.error('Error filtering tasks by employee:', err);
         }
       });
     }
@@ -247,10 +234,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
    * NOTE: Only call this manually (e.g., via refresh button) to avoid 403 errors on page load
    */
   private loadTasksFromApi(): void {
-    console.log('📡 Manager - Manually loading tasks from API...');
     this.apiService.getTasksCreatedByMe().pipe(takeUntil(this.destroy$)).subscribe({
       next: (tasks: any[]) => {
-        console.log('✅ Manager - Tasks loaded from API:', tasks);
         this.tasks = tasks;
         // Update dataService so other components get the data
         if (tasks && tasks.length > 0) {
@@ -261,17 +246,13 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
-        console.error('❌ Manager - Error loading tasks from API:', err);
-        console.log('💡 Falling back to localStorage...');
         // Try to load from localStorage as fallback
         if (typeof window !== 'undefined' && window.localStorage) {
           const stored = localStorage.getItem('manager_tasks');
           if (stored) {
             try {
               this.tasks = JSON.parse(stored);
-              console.log('✅ Loaded tasks from localStorage:', this.tasks.length);
             } catch (e) {
-              console.error('Error parsing tasks from localStorage:', e);
             }
           }
         }
@@ -290,10 +271,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
    * Refresh submissions list from service
    */
   refreshSubmissions(): void {
-    console.log('🔄 Manager.refreshSubmissions - Refreshing submissions list');
     const teamMemberNames = this.teamMembers.map(m => m.name);
     this.taskSubmissions = this.submissionService.getTeamSubmissions(teamMemberNames);
-    console.log('✅ Manager.refreshSubmissions - Updated submissions:', this.taskSubmissions);
     this.notificationService.success('Submissions refreshed');
   }
 
@@ -331,11 +310,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
       dueDate: this.newTask.dueDate ? new Date(this.newTask.dueDate).toISOString() : null
     };
 
-    console.log('Submitting task payload:', payload);
-
     this.apiService.createTask(payload).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
-        console.log('Task created successfully:', response);
         this.isSubmitting = false;
 
         // Show success notification
@@ -349,7 +325,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         this.loadTasksFromApi();
       },
       error: (err: any) => {
-        console.error('Error creating task:', err);
         this.isSubmitting = false;
 
         // Extract error message
@@ -380,7 +355,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
   async onDeleteTask(id: any): Promise<void> {
     // Validate ID exists
     if (!id && id !== 0) {
-      console.error('Cannot delete task: ID is missing or undefined', id);
       this.notificationService.error('Cannot delete task: ID is missing');
       return;
     }
@@ -392,7 +366,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
 
     // Check if task is approved - cannot delete approved tasks
     if (task?.status === 'Approved' || task?.status === 'Completed') {
-      console.warn('Cannot delete approved or completed task:', taskTitle);
       await Swal.fire({
         title: 'Cannot Delete Task',
         html: `
@@ -438,24 +411,20 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('Deleting task with ID:', id);
-
     this.taskService.deleteTaskById(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          console.log('Task deleted successfully');
 
           // Remove from all local arrays
           this.tasks = this.tasks.filter(t => (t.taskId || t.id) !== id);
           this.pendingApprovalTasks = this.pendingApprovalTasks.filter(t => (t.taskId || t.id) !== id);
-          this.overdueTasks = this.overdueTasks.filter(t => (t.taskId || t.id) !== id);
+
 
           this.notificationService.success('Task deleted successfully');
           this.loadTasksFromApi();
         },
         error: (err: any) => {
-          console.error('Error deleting task:', err);
           const errorMessage = err?.error?.message || err?.error?.title || err?.error?.detail || 'Failed to delete task';
           this.notificationService.error(errorMessage);
         }
@@ -467,7 +436,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
    * Syncs database data with form controls
    */
   openEditModal(task: any) {
-    console.log('Opening edit modal for task:', task);
 
     this.selectedTask = task;
     // Use taskId (database ID) for editing
@@ -486,8 +454,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
       // Handle date formatting - ensure proper format for input[type=date]
       dueDate: this.formatDateForInput(task.dueDate)
     };
-
-    console.log('Edit form populated with:', this.editTask);
     this.showEditModal = true;
   }
 
@@ -495,7 +461,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
    * Open view modal for task history (Approved tab)
    */
   openViewModal(task: any) {
-    console.log('Opening view modal for task:', task);
     this.viewTask = task;
 
     // Load time logs to display employee work descriptions
@@ -504,10 +469,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         const logs = response?.data || response || [];
         this.viewTask.timeLogs = logs;
         this.showViewModal = true;
-        console.log('✅ Time logs loaded for view modal:', logs);
       },
       error: (err) => {
-        console.error('❌ Error loading time logs for view modal:', err);
         // Still show modal even if logs fail
         this.viewTask.timeLogs = [];
         this.showViewModal = true;
@@ -537,7 +500,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         return date.toISOString().split('T')[0];
       }
     } catch (e) {
-      console.error('Error formatting date:', e);
     }
     return '';
   }
@@ -565,7 +527,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
   saveEditTask() {
     // Validate editingTaskId
     if (!this.editingTaskId && this.editingTaskId !== 0) {
-      console.error('Cannot update task: editingTaskId is missing');
       this.notificationService.error('Cannot update task: Task ID is missing');
       return;
     }
@@ -590,22 +551,18 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
     };
 
     // Log form values before PUT call for debugging
-    console.log('Updating task ID:', this.editingTaskId);
     console.log('Form values being sent:', JSON.stringify(updatedTask, null, 2));
 
     this.taskService.updateTaskById(this.editingTaskId, updatedTask)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('Task updated successfully:', response);
           this.isSubmitting = false;
           this.notificationService.success('Task updated successfully');
           this.closeEditModal();
           this.loadTasksFromApi();
         },
         error: (err: any) => {
-          console.error('Error updating task:', err);
-          console.error('Error response body:', err?.error);
           this.isSubmitting = false;
           const errorMessage = err?.error?.message || err?.error?.title || err?.error?.detail || 'Failed to update task';
           this.notificationService.error(errorMessage);
@@ -668,13 +625,11 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
 
     switch (this.approvalForm.status) {
       case 'Approved':
-        console.log('📋 Manager approving submission:', submissionId);
         this.approveTaskCompletion(this.selectedSubmission);
         this.notificationService.success(`✅ Task "${taskTitle}" has been approved!`);
         break;
 
       case 'Rejected':
-        console.log('❌ Manager rejecting submission:', submissionId);
         this.submissionService.rejectSubmission(
           submissionId,
           this.currentManagerName,
@@ -684,7 +639,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         break;
 
       case 'Need Changes':
-        console.log('⚠️ Manager requesting changes on submission:', submissionId);
         this.submissionService.needsChanges(
           submissionId,
           this.currentManagerName,
@@ -712,13 +666,10 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
     const taskId = submission.taskId;
     const approvalComments = this.approvalForm.comments;
 
-    console.log('📋 Manager.approveTaskCompletion - Approving task:', taskId);
-
     this.taskService.approveTaskCompletion(taskId, approvalComments)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('✅ Manager.approveTaskCompletion - Task approved:', response);
 
           // Approve submission in service
           this.submissionService.approveSubmission(
@@ -734,7 +685,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
           this.isSubmitting = false;
         },
         error: (err: any) => {
-          console.error('❌ Manager.approveTaskCompletion - Error approving task:', err);
           const message = err.error?.message || err.error || 'Failed to approve task';
           this.notificationService.error(message);
           this.isSubmitting = false;
@@ -759,13 +709,10 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
 
-    console.log('❌ Manager.rejectTaskCompletion - Rejecting task:', taskId);
-
     this.taskService.rejectTask(taskId, reason)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('✅ Manager.rejectTaskCompletion - Task rejected:', response);
 
           // Remove from pendingApprovalTasks immediately for instant UI update
           this.pendingApprovalTasks = this.pendingApprovalTasks.filter(t => (t.taskId || t.id) !== taskId);
@@ -777,7 +724,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
           this.isSubmitting = false;
         },
         error: (err: any) => {
-          console.error('❌ Manager.rejectTaskCompletion - Error rejecting task:', err);
           const message = err.error?.message || err.error || 'Failed to reject task';
           this.notificationService.error(message);
           this.isSubmitting = false;
@@ -804,13 +750,10 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
 
-    console.log('📋 Manager.approveTask - Approving task:', taskId);
-
     this.taskService.approveTaskCompletion(taskId, '')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('✅ Manager.approveTask - Task approved:', response);
 
           // Remove from pendingApprovalTasks immediately for instant UI update
           this.pendingApprovalTasks = this.pendingApprovalTasks.filter(t => (t.taskId || t.id) !== taskId);
@@ -822,7 +765,6 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
           this.isSubmitting = false;
         },
         error: (err: any) => {
-          console.error('❌ Manager.approveTask - Error approving task:', err);
           const message = err.error?.message || err.error || 'Failed to approve task';
           this.notificationService.error(message);
           this.isSubmitting = false;
@@ -889,13 +831,11 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
    * Calls GET /api/Task/pending-approval
    */
   loadPendingApprovalTasks() {
-    console.log('📋 Manager - Loading pending approval tasks');
 
     this.taskService.getPendingApprovalTasks()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (tasks: any[]) => {
-          console.log('✅ Manager - Pending approval tasks loaded:', tasks);
 
           // API now returns enriched tasks array directly
           this.pendingApprovalTasks = Array.isArray(tasks) ? tasks : [];
@@ -903,34 +843,7 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
           this.notificationService.success(`Found ${this.pendingApprovalTasks.length} tasks awaiting approval`);
         },
         error: (err: any) => {
-          console.error('❌ Manager - Error loading pending approval tasks:', err);
           const message = err.error?.message || 'Failed to load pending approval tasks';
-          this.notificationService.error(message);
-        }
-      });
-  }
-
-  /**
-   * Load overdue tasks
-   * Calls GET /api/Task/overdue
-   */
-  loadOverdueTasks() {
-    console.log('📋 Manager - Loading overdue tasks');
-
-    this.taskService.getOverdueTasks()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tasks: any[]) => {
-          console.log('✅ Manager - Overdue tasks loaded:', tasks);
-
-          // API now returns enriched tasks array directly
-          this.overdueTasks = Array.isArray(tasks) ? tasks : [];
-
-          this.notificationService.success(`Found ${this.overdueTasks.length} overdue tasks`);
-        },
-        error: (err: any) => {
-          console.error('❌ Manager - Error loading overdue tasks:', err);
-          const message = err.error?.message || 'Failed to load overdue tasks';
           this.notificationService.error(message);
         }
       });
@@ -1060,10 +973,8 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
         const logs = response?.data || response || [];
         this.taskTimeLogs = logs;
         this.showTimeLogsModal = true;
-        console.log('✅ Time logs loaded:', logs);
       },
       error: (err) => {
-        console.error('❌ Error loading time logs:', err);
         this.notificationService.error('Failed to load time logs');
       }
     });

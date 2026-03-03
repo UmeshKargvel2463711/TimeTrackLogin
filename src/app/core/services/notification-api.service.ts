@@ -67,7 +67,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || [])),
       catchError(error => {
-        console.error('Error fetching notifications:', error);
         return of([]);
       })
     );
@@ -87,7 +86,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || [])),
       catchError(error => {
-        console.error('Error fetching unread notifications:', error);
         return of([]);
       })
     );
@@ -107,7 +105,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || 0)),
       catchError(error => {
-        console.error('Error fetching unread count:', error);
         return of(0);
       })
     );
@@ -128,7 +125,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || false)),
       catchError(error => {
-        console.error('Error creating notification:', error);
         return of(false);
       })
     );
@@ -149,7 +145,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || false)),
       catchError(error => {
-        console.error('Error marking notification as read:', error);
         return of(false);
       })
     );
@@ -170,7 +165,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || false)),
       catchError(error => {
-        console.error('Error marking all as read:', error);
         return of(false);
       })
     );
@@ -190,7 +184,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || false)),
       catchError(error => {
-        console.error('Error deleting notification:', error);
         return of(false);
       })
     );
@@ -213,7 +206,6 @@ export class NotificationApiService {
       }),
       switchMap(response => of(response.data || false)),
       catchError(error => {
-        console.error('Error clearing all notifications:', error);
         return of(false);
       })
     );

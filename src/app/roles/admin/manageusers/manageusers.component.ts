@@ -69,8 +69,6 @@ export class ManageusersComponent implements OnInit {
         managerId: u.managerId,
         assignedEmployees: u.assignedEmployees || []
       }));
-      
-      console.log('👥 ManageUsers - Updated users:', this.allUsers.length);
       this.applySearch();
     });
     
@@ -147,18 +145,8 @@ export class ManageusersComponent implements OnInit {
     const newRole = this.selectedUser.role;
     const roleChanged = oldRole !== newRole;
 
-    console.log('💾 Saving user changes:', {
-      userId: this.selectedUser.id,
-      oldRole,
-      newRole,
-      roleChanged,
-      managerId: this.selectedUser.managerId,
-      assignedEmployees: this.selectedUser.assignedEmployees
-    });
-
     // Handle role change: Employee -> Manager (Upgrade)
     if (roleChanged && oldRole === 'Employee' && newRole === 'Manager') {
-      console.log('🔼 Upgrading Employee to Manager');
       this.userService.upgradeToManager(this.selectedUser.id);
       // Also update basic info
       this.userService.updateUser(this.selectedUser.id, {
@@ -168,7 +156,6 @@ export class ManageusersComponent implements OnInit {
     }
     // Handle role change: Manager -> Employee (Downgrade)
     else if (roleChanged && oldRole === 'Manager' && newRole === 'Employee') {
-      console.log('🔽 Downgrading Manager to Employee');
       this.userService.downgradeToEmployee(this.selectedUser.id);
       // Also update basic info and assign manager if selected
       if (this.selectedUser.managerId) {
@@ -186,7 +173,6 @@ export class ManageusersComponent implements OnInit {
 
       // Use UserService to handle the manager-employee relationship
       if (oldManagerId !== newManagerId) {
-        console.log('🔗 Reassigning manager:', oldManagerId, '->', newManagerId);
         this.userService.assignManagerToEmployee(this.selectedUser.id, newManagerId, oldManagerId);
       }
       // Also update basic user data
@@ -202,7 +188,6 @@ export class ManageusersComponent implements OnInit {
       const newAssignedEmployees = this.selectedUser.assignedEmployees || [];
 
       // Use UserService to handle the manager-employee relationships
-      console.log('👥 Updating assigned employees:', oldAssignedEmployees, '->', newAssignedEmployees);
       this.userService.assignEmployeesToManager(
         this.selectedUser.id, 
         newAssignedEmployees, 
@@ -299,13 +284,10 @@ export class ManageusersComponent implements OnInit {
   // --- MANAGER ASSIGNMENT HELPERS ---
   getManagerName(managerId?: string): string {
     if (!managerId) {
-      console.log('👤 getManagerName - No managerId provided');
       return '';
     }
-    console.log('👤 getManagerName - Looking for manager with ID:', managerId);
     console.log('👤 getManagerName - Available users:', this.allUsers.map(u => ({ id: u.id, fullName: u.fullName })));
     const manager = this.allUsers.find(u => u.id === managerId);
-    console.log('👤 getManagerName - Found manager:', manager?.fullName || 'NOT FOUND');
     return manager ? manager.fullName : '';
   }
 

@@ -88,7 +88,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
     // Subscribe to task submission updates to get real-time approval/rejection status
     this.taskSubmissionService.getSubmissions().pipe(takeUntil(this.destroy$)).subscribe((submissions: TaskSubmission[]) => {
-      console.log('📝 Employee.ngOnInit - Submission status updated:', submissions);
 
       // Check if any task status has changed based on submission approval
       submissions.forEach(submission => {
@@ -99,7 +98,6 @@ export class TasksComponent implements OnInit, OnDestroy {
           // Update task status based on submission approval status
           if (submission.approvalStatus === 'Approved') {
             if (this.assignedTasks[taskIndex].status !== 'Approved') {
-              console.log('✅ Task approved by manager:', submission.taskId);
               this.assignedTasks[taskIndex].status = 'Approved';
               this.assignedTasks[taskIndex].isRejected = false;
               this.assignedTasks[taskIndex].approvalComments = submission.approvalComments;
@@ -116,7 +114,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
             // Change status back to InProgress so it appears in My Tasks tab
             if (currentStatus !== 'InProgress' && currentStatus !== 'In Progress') {
-              console.log('❌ Task rejected by manager:', submission.taskId);
               this.assignedTasks[taskIndex].status = 'InProgress';
               this.notificationService.error(`Task "${submission.taskTitle}" was rejected. Reason: ${submission.approvalComments || 'No reason provided'}`);
               this.updateStatsFromAssignedTasks();
@@ -138,18 +135,14 @@ export class TasksComponent implements OnInit, OnDestroy {
   private loadTasks() {
     const currentUser = this.authService.currentUser();
     if (!currentUser) {
-      console.error('❌ Employee.loadTasks - No current user found');
       return;
     }
 
     this.isLoadingTasks = true;
-    console.log('✅ Employee.loadTasks - Fetching tasks from API for user:', currentUser.fullName);
 
     // Use taskService.getMyTasks() which calls /api/Task/my-tasks
     this.taskService.getMyTasks().pipe(takeUntil(this.destroy$)).subscribe({
       next: (tasks: any[]) => {
-        console.log(`✅ Employee.loadTasks - Received ${tasks.length} tasks from API`);
-        console.log('📋 Task details:', tasks);
 
         // Store raw tasks from API
         this.assignedTasks = tasks;
@@ -179,7 +172,6 @@ export class TasksComponent implements OnInit, OnDestroy {
         this.isLoadingTasks = false;
       },
       error: (err) => {
-        console.error('❌ Employee.loadTasks - Error loading tasks:', err);
         this.notificationService.error('Failed to load tasks');
         this.isLoadingTasks = false;
       }
@@ -218,7 +210,6 @@ export class TasksComponent implements OnInit, OnDestroy {
   private loadEmployeeStats(): void {
     const employeeId = this.getCurrentEmployeeId();
     if (!employeeId) {
-      console.warn('⚠️ Cannot load employee stats - employeeId not found');
       return;
     }
 
@@ -226,7 +217,6 @@ export class TasksComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response && response.success && response.data) {
           const stats = response.data;
-          console.log('✅ Employee stats loaded:', stats);
           // Update stats display - Completed count includes both Completed and Approved tasks
           const completedCount = (stats.completedTasks || 0) + (stats.approvedTasks || 0);
           this.stats = [
@@ -237,7 +227,6 @@ export class TasksComponent implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
-        console.error('❌ Error loading employee stats:', err);
         // Fall back to counting from assignedTasks
         this.updateStatsFromAssignedTasks();
       }
@@ -354,14 +343,11 @@ export class TasksComponent implements OnInit, OnDestroy {
     const taskId = task.id || task.taskId || task.displayTaskId;
 
     if (!taskId) {
-      console.error('❌ Employee.onStartTask - Task ID not found in:', task);
       this.notificationService.error('Invalid task ID');
       return;
     }
 
     this.isSubmitting = true;
-
-    console.log('🚀 Employee.onStartTask - Starting task:', taskId, 'Task:', task);
 
     // Optimistically update local state
     const index = this.assignedTasks.findIndex(t => (t.id || t.taskId || t.displayTaskId) === taskId);
@@ -374,7 +360,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
     this.taskService.startTask(taskId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
-        console.log('✅ Employee.onStartTask - Task started successfully:', response);
 
         // Update task with response data if available
         if (index !== -1 && response?.data) {
@@ -394,7 +379,6 @@ export class TasksComponent implements OnInit, OnDestroy {
         this.isSubmitting = false;
       },
       error: (err: any) => {
-        console.error('❌ Employee.onStartTask - Error starting task:', err);
 
         // Revert optimistic update on error
         if (index !== -1) {
@@ -419,7 +403,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     const taskId = this.selectedRawTask?.id || this.selectedRawTask?.taskId || this.selectedRawTask?.displayTaskId;
 
     if (!taskId) {
-      console.error('❌ Employee.onCompleteTask - Task ID not found in:', this.selectedRawTask);
       this.notificationService.error('Invalid task');
       this.closeModal();
       return;
@@ -434,8 +417,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     const hoursSpent = this.submissionForm.hoursSpent;
     const comments = this.submissionForm.comments;
 
-    console.log('✔️ Employee.onCompleteTask - Completing task:', taskId, 'Hours:', hoursSpent);
-
     // Optimistically update local state
     const index = this.assignedTasks.findIndex(t => (t.id || t.taskId || t.displayTaskId) === taskId);
     if (index !== -1) {
@@ -445,7 +426,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
     this.taskService.completeTask(taskId, hoursSpent, comments).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
-        console.log('✅ Employee.onCompleteTask - Task completed successfully:', response);
 
         // Create a submission record for manager approval
         const taskTitle = this.selectedRawTask?.title || 'Task';
@@ -471,7 +451,6 @@ export class TasksComponent implements OnInit, OnDestroy {
         this.isSubmitting = false;
       },
       error: (err: any) => {
-        console.error('❌ Employee.onCompleteTask - Error completing task:', err);
 
         // Revert optimistic update on error
         if (index !== -1) {
@@ -507,7 +486,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     const taskId = task.id || task.taskId || task.displayTaskId;
 
     if (!taskId) {
-      console.error('❌ Employee.openLogTimeModal - Task ID not found');
       this.notificationService.error('Invalid task ID');
       return;
     }
@@ -565,13 +543,10 @@ export class TasksComponent implements OnInit, OnDestroy {
       workDescription: this.logTimeForm.workDescription
     };
 
-    console.log('⏰ Employee.submitLogTime - Logging time:', logTimeDto);
-
     this.taskService.logTaskTime(logTimeDto)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('✅ Employee.submitLogTime - Time logged successfully:', response);
           this.notificationService.success(`⏰ Logged ${this.logTimeForm.hoursSpent} hours on task`);
           this.closeLogTimeModal();
           this.isSubmitting = false;
@@ -580,7 +555,6 @@ export class TasksComponent implements OnInit, OnDestroy {
           this.loadTasks();
         },
         error: (err: any) => {
-          console.error('❌ Employee.submitLogTime - Error logging time:', err);
           const message = err.error?.message || err.error || 'Failed to log time';
           this.notificationService.error(message);
           this.isSubmitting = false;
@@ -763,3 +737,4 @@ export class TasksComponent implements OnInit, OnDestroy {
     }
   }
 }
+

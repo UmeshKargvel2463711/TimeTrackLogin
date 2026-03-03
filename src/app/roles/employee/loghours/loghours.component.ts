@@ -166,19 +166,12 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             this.currentLogId = response.data.logId;
-            console.log('✅ Time log created on Punch In, ID:', this.currentLogId);
-            console.log('📦 Full response:', response);
             this.notificationService.success('Punched In - Timer started');
           } else {
-            console.error('❌ API returned unsuccessful response:', response);
             this.notificationService.error('Failed to create time log');
           }
         },
         error: (error: any) => {
-          console.error('❌ Error creating time log on Punch In:', error);
-          console.error('📦 Error response:', error.error);
-          console.error('📦 Validation errors:', error.error?.errors);
-          console.error('📦 Status:', error.status, error.statusText);
           this.notificationService.error('Punched in locally, but failed to save to database');
         }
       });
@@ -211,8 +204,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         startTime: `${currentTime24h}:00` // HH:mm:ss format
       };
       
-      console.log('📤 Starting break in database:', createBreakDto);
-      
       this.breakService.startBreak(createBreakDto).subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -226,18 +217,13 @@ export class LogHoursComponent implements OnInit, OnDestroy {
               endTime: '--:-- --',
               duration: '--'
             });
-            
-            console.log('✅ Break started in database, ID:', this.currentBreakId);
             this.notificationService.success('Break started');
           } else {
-            console.error('❌ Failed to start break:', response);
             this.notificationService.error('Failed to start break');
             this.isOnBreak = false;
           }
         },
         error: (error: any) => {
-          console.error('❌ Error starting break:', error);
-          console.error('📦 Error response:', error.error);
           
           // Handle backend error format
           let errorMessage = 'Failed to start break';
@@ -273,8 +259,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         endTime: `${breakEndTime24h}:00` // HH:mm:ss format
       };
       
-      console.log(`📤 Ending break ${this.currentBreakId}:`, endBreakDto);
-      
       this.breakService.endBreak(this.currentBreakId, endBreakDto).subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -293,8 +277,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
             if (!this.completedActivities.includes(this.selectedActivity)) {
               this.completedActivities.push(this.selectedActivity);
             }
-            
-            console.log('✅ Break ended in database, duration:', response.data.duration, 'minutes');
             this.notificationService.success('Break ended and logged');
             
             // Clear current break tracking
@@ -302,14 +284,11 @@ export class LogHoursComponent implements OnInit, OnDestroy {
             this.currentBreakStartTime = '';
             this.selectedActivity = '';
           } else {
-            console.error('❌ Failed to end break:', response);
             this.notificationService.error('Failed to end break');
             this.isOnBreak = true; // Restore break state
           }
         },
         error: (error: any) => {
-          console.error('❌ Error ending break:', error);
-          console.error('📦 Error response:', error.error);
           
           // Handle backend error format
           let errorMessage = 'Failed to end break';
@@ -509,8 +488,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         
         // Start live timer
         this.startLiveTimer();
-        
-        console.log('🔄 Resumed active session for date:', selectedDateFormatted);
         this.notificationService.success('Active session resumed');
       } else {
         // Completed session - show static data
@@ -529,8 +506,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         this.isPunchedIn = true;
         this.isPunchedOut = true;
         this.isOnBreak = false;
-        
-        console.log('📋 Loaded completed log for date:', selectedDateFormatted);
         
         // Get the log ID from the API to load breaks for completed session
         this.fetchLogIdForDate(selectedDateFormatted);
@@ -576,9 +551,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
             this.capturedPunchOutTime = matchingLog.endTime.split(':').slice(0, 2).join(':');
           }
           
-          console.log('✅ Retrieved log ID for active session:', this.currentLogId);
-          console.log('📋 Raw times - Start:', this.capturedPunchInTime, 'End:', this.capturedPunchOutTime);
-          
           // Load breaks for this time log
           if (this.currentLogId) {
             this.loadBreaksForTimeLog(this.currentLogId);
@@ -586,7 +558,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        console.error('❌ Error fetching log ID:', error);
       }
     });
   }
@@ -653,19 +624,15 @@ export class LogHoursComponent implements OnInit, OnDestroy {
             endTime: '--:-- --',
             duration: '--'
           });
-          
-          console.log('🔄 Active break resumed:', activeBreak.activity);
           this.notificationService.success(`Active break resumed: ${activeBreak.activity}`);
           
           // Also load all breaks for this time log
           this.loadBreaksForTimeLog(activeBreak.timeLogId);
         } else {
           // No active break found
-          console.log('ℹ️ No active break found');
         }
       },
       error: (error) => {
-        console.error('❌ Error checking for active break:', error);
         // Silently fail - not critical if this check fails
       }
     });
@@ -700,18 +667,13 @@ export class LogHoursComponent implements OnInit, OnDestroy {
           this.completedActivities = response.data
             .filter(b => b.endTime !== null)
             .map(b => b.activity);
-          
-          console.log('✅ Loaded', response.data.length, 'breaks from database');
         } else {
-          console.log('ℹ️ No breaks found for this time log');
         }
       },
       error: (error) => {
-        console.error('❌ Error loading breaks:', error);
         
         // Handle backend error format
         if (error.error?.errors && Array.isArray(error.error.errors)) {
-          console.error('Backend errors:', error.error.errors);
         }
         
         // Show notification only for critical errors (not 404)
@@ -750,13 +712,11 @@ export class LogHoursComponent implements OnInit, OnDestroy {
           }
           
           this.notificationService.success('Break deleted successfully');
-          console.log('✅ Break deleted:', breakId);
         } else {
           this.notificationService.error('Failed to delete break');
         }
       },
       error: (error: any) => {
-        console.error('❌ Error deleting break:', error);
         
         // Handle backend error format
         let errorMessage = 'Failed to delete break';
@@ -841,14 +801,9 @@ export class LogHoursComponent implements OnInit, OnDestroy {
       totalHours: parseFloat(totalHours.toFixed(2)),
       activity: this.completedActivities.length > 0 ? this.completedActivities.join(', ') : 'N/A'
     };
-
-    console.log('📤 Final payload validation:');
     console.log('  - date (ISO string):', typeof updateDto.date, updateDto.date);
-    console.log('  - startTime:', typeof updateDto.startTime, updateDto.startTime);
-    console.log('  - endTime:', typeof updateDto.endTime, updateDto.endTime);
     console.log('  - breakDuration (number):', typeof updateDto.breakDuration, updateDto.breakDuration);
     console.log('  - totalHours (number):', typeof updateDto.totalHours, updateDto.totalHours);
-    console.log('  - activity:', typeof updateDto.activity, updateDto.activity);
 
     console.log(`🔄 Finalizing time log - ${this.currentLogId ? 'UPDATE (PUT)' : 'CREATE (POST)'}`);
     console.log('📤 Full payload:', JSON.stringify(updateDto, null, 2));
@@ -860,23 +815,14 @@ export class LogHoursComponent implements OnInit, OnDestroy {
     apiCall.subscribe({
       next: (response) => {
         if (response.success) {
-          console.log('✅ Time log finalized successfully');
           this.notificationService.success('Time log saved successfully');
           this.loadTimeLogs();
         } else {
-          console.error('❌ API returned unsuccessful response:', response);
           this.notificationService.error(response.message || 'Failed to save time log');
         }
         this.isSubmitting = false;
       },
       error: (error: any) => {
-        console.error('❌ Error saving time log:', error);
-        console.error('📦 Error response:', error.error);
-        console.error('📦 Validation errors:', error.error?.errors);
-        console.error('📦 Error title:', error.error?.title);
-        console.error('📦 Status:', error.status, error.statusText);
-        console.error('📦 Payload sent:', updateDto);
-        console.error('📦 Current Log ID:', this.currentLogId);
         
         // Display specific validation errors to user
         if (error.error?.errors) {
@@ -941,7 +887,6 @@ export class LogHoursComponent implements OnInit, OnDestroy {
         this.updateStatistics();
       },
       error: (error: any) => {
-        console.error('Error loading time logs:', error);
         this.notificationService.error('Failed to load time logs');
       }
     });

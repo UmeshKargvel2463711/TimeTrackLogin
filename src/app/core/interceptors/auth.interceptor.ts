@@ -30,12 +30,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('🔐 AuthInterceptor - Adding token to request:', req.url);
       return next(authReq);
     }
   } catch (e) {
-    console.error('❌ AuthInterceptor - Error parsing user session:', e);
   }
 
   return next(req);
 };
+

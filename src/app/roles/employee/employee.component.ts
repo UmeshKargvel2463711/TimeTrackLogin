@@ -35,12 +35,6 @@ export class EmployeeComponent implements OnInit {
       this.employeeName = fullName;
       this.userRole = currentUser.role || 'Employee';
       this.profileInitial = fullName.charAt(0).toUpperCase();
-
-      console.log('Employee loaded:', {
-        fullName: this.employeeName,
-        role: this.userRole,
-        initial: this.profileInitial
-      });
     }
   }
 
@@ -69,3 +63,4 @@ export class EmployeeComponent implements OnInit {
     // AuthService.logout() already navigates to /signin, so no need to navigate again
   }
 }
+

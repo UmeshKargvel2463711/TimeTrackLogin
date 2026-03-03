@@ -10,3 +10,4 @@ export class FooterComponent {
   supportEmail = 'support@timetrack.internal';
 
 }
+

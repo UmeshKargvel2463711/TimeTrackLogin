@@ -20,3 +20,4 @@ export class UnauthorizedComponent {
     this.router.navigate(['']);
   }
 }
+

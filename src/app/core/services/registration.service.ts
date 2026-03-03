@@ -36,7 +36,6 @@ export class RegistrationService {
             headers = headers.set('Authorization', `Bearer ${user.token}`);
           }
         } catch (e) {
-          console.error('Error parsing user session:', e);
         }
       }
     }
@@ -48,7 +47,6 @@ export class RegistrationService {
       .pipe(
         map(response => this.mapRegistrations(response.data || response || [])),
         catchError(err => {
-          console.error('Error fetching all registrations:', err);
           return of([]);
         })
       );
@@ -59,7 +57,6 @@ export class RegistrationService {
       .pipe(
         map(response => this.mapRegistrations(response.data || response || [])),
         catchError(err => {
-          console.error('Error fetching pending registrations:', err);
           return of([]);
         })
       );

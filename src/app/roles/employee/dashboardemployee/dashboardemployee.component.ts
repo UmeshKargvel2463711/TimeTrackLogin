@@ -64,8 +64,6 @@ export class DashboardemployeeComponent implements OnInit {
       weekAgo.setDate(weekAgo.getDate() - 7);
       const weekLogs = myLogs.filter(log => new Date(log.date) >= weekAgo);
       this.totalHoursWeek = weekLogs.reduce((sum, log) => sum + (log.totalHours || 0), 0);
-
-      console.log('Time Stats:', { today: this.totalHoursToday, week: this.totalHoursWeek });
     });
 
     // Load tasks
@@ -77,13 +75,6 @@ export class DashboardemployeeComponent implements OnInit {
 
       const total = myTasks.length;
       this.taskCompletionRate = total > 0 ? Math.round((this.completedTasks / total) * 100) : 0;
-
-      console.log('Task Stats:', { 
-        completed: this.completedTasks, 
-        inProgress: this.inProgressTasks, 
-        pending: this.pendingTasks,
-        rate: this.taskCompletionRate
-      });
     });
   }
 }

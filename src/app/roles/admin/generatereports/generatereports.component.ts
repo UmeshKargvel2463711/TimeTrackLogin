@@ -123,7 +123,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnInit(): void {
-    console.log('🔄 GenerateReportsComponent initialized - Loading organization analytics');
     this.loadOrganizationAnalytics();
   }
 
@@ -147,8 +146,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
     this.isLoading = true;
     this.errorMessage = null;
 
-    console.log('📡 Fetching organization analytics with period:', this.selectedPeriod);
-
     // Calculate date range based on selected period
     const endDate = new Date();
     const startDate = new Date();
@@ -157,8 +154,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
     // Format dates for API (ISO string format)
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
-
-    console.log('📅 Date range:', { startDate: startDateStr, endDate: endDateStr });
 
     forkJoin({
       organizationData: this.apiService.getOrganizationAnalytics(this.selectedPeriod as 7 | 14 | 30 | 90),
@@ -170,7 +165,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
           this.processAnalyticsData(results.organizationData, results.taskCompletion);
         },
         error: (err: any) => {
-          console.error('❌ Error loading analytics:', err);
           this.errorMessage = 'Failed to load analytics data';
           this.isLoading = false;
         }
@@ -181,12 +175,9 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
    * Process analytics data from both organization and task endpoints
    */
   private processAnalyticsData(organizationResponse: OrganizationAnalyticsResponse, taskCompletionResponse: any): void {
-    console.log('✅ Organization analytics received:', organizationResponse.data);
-    console.log('✅ Task completion breakdown received:', taskCompletionResponse.data);
 
     // Ensure we have data
     if (!organizationResponse.data) {
-      console.warn('⚠️ No organization data in response');
       this.isLoading = false;
       return;
     }
@@ -218,7 +209,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
     this.taskCompletion.inProgress = allTasks.reduce((sum, t) => sum + t.inProgress, 0);
     this.taskCompletion.pending = allTasks.reduce((sum, t) => sum + t.pending, 0);
     this.taskCompletion.completionRate = totalAssigned > 0 ? Math.round((totalCompleted / totalAssigned) * 100) : 0;
-    console.log('✅ Aggregated manager-assigned tasks:', { totalCompleted, totalAssigned });
 
     console.log('📊 Task Completion Metrics:', {
       completed: this.taskCompletion.completed,
@@ -262,9 +252,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
       this.departmentRows = [];
     }
 
-    console.log('✅ Summary updated:', this.summary);
-    console.log('✅ Department rows:', this.departmentRows);
-
     // Update charts after data is loaded
     setTimeout(() => {
       this.updateCharts();
@@ -280,7 +267,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
   private loadDepartments(): void {
     // Departments are now loaded from organization-summary endpoint
     // This method is kept for reference but not called anymore
-    console.log('📡 Loading departments...');
   }
 
   /**
@@ -290,7 +276,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
   private loadAnalyticsData(): void {
     // Analytics data is now loaded from organization-summary endpoint
     // This method is kept for reference but not called anymore
-    console.log('📡 Loading analytics data...');
   }
 
   /**
@@ -325,7 +310,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
    * Refresh analytics data with current filters
    */
   refreshData() {
-    console.log('🔄 Refreshing analytics data...');
     this.loadOrganizationAnalytics();
   }
 
@@ -333,7 +317,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
    * Reset filters and reload data
    */
   resetFilters() {
-    console.log('🔄 Resetting filters...');
     this.selectedPeriod = 7;
     this.selectedDepartment = 'All';
     this.loadOrganizationAnalytics();
@@ -343,7 +326,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
    * Handle period change
    */
   onPeriodChange() {
-    console.log('📊 Period changed to:', this.selectedPeriod);
     this.loadOrganizationAnalytics();
   }
 
@@ -352,7 +334,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
    * Note: Department filtering happens on frontend (client-side filtering)
    */
   onDepartmentChange() {
-    console.log('🏢 Department filtered to:', this.selectedDepartment);
     this.updateCharts();
   }
 

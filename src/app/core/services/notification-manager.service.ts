@@ -32,7 +32,6 @@ export class NotificationManagerService {
           this.notificationsSubject.next(notifications);
         }
       } catch (error) {
-        console.error('Failed to load notifications from storage:', error);
       }
     }
   }
@@ -42,7 +41,6 @@ export class NotificationManagerService {
       try {
         localStorage.setItem('notifications', JSON.stringify(this.notificationsSubject.value));
       } catch (error) {
-        console.error('Failed to save notifications to storage:', error);
       }
     }
   }
@@ -101,3 +99,4 @@ export class NotificationManagerService {
     this.addNotification(msg, 'task-rejected');
   }
 }
+

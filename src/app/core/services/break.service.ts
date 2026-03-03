@@ -26,7 +26,6 @@ export class BreakService {
             headers = headers.set('Authorization', `Bearer ${user.token}`);
           }
         } catch (e) {
-          console.error('Failed to parse user session', e);
         }
       }
     }
@@ -42,7 +41,6 @@ export class BreakService {
    * POST /api/break
    */
   startBreak(dto: CreateBreakDto): Observable<ApiResponse<BreakResponseDto>> {
-    console.log('📤 POST /api/break - Starting break:', dto);
     return this.http.post<ApiResponse<BreakResponseDto>>(
       this.baseUrl,
       dto,
@@ -55,7 +53,6 @@ export class BreakService {
    * PUT /api/break/{breakId}/end
    */
   endBreak(breakId: string, dto: EndBreakDto): Observable<ApiResponse<BreakResponseDto>> {
-    console.log(`📤 PUT /api/break/${breakId}/end - Ending break:`, dto);
     return this.http.put<ApiResponse<BreakResponseDto>>(
       `${this.baseUrl}/${breakId}/end`,
       dto,
@@ -68,7 +65,6 @@ export class BreakService {
    * GET /api/timelog/{timeLogId}/breaks
    */
   getBreaksForTimeLog(timeLogId: string): Observable<ApiResponse<BreakResponseDto[]>> {
-    console.log(`📤 GET /api/timelog/${timeLogId}/breaks - Fetching breaks`);
     return this.http.get<ApiResponse<BreakResponseDto[]>>(
       `${this.timeLogUrl}/${timeLogId}/breaks`,
       { headers: this.getAuthHeaders() }
@@ -81,7 +77,6 @@ export class BreakService {
    * Used for break resume logic after logout/refresh
    */
   getActiveBreak(): Observable<ApiResponse<BreakResponseDto | null>> {
-    console.log('📤 GET /api/break/active - Checking for active break');
     return this.http.get<ApiResponse<BreakResponseDto | null>>(
       `${this.baseUrl}/active`,
       { headers: this.getAuthHeaders() }
@@ -93,10 +88,10 @@ export class BreakService {
    * DELETE /api/break/{breakId}
    */
   deleteBreak(breakId: string): Observable<ApiResponse<void>> {
-    console.log(`📤 DELETE /api/break/${breakId} - Deleting break`);
     return this.http.delete<ApiResponse<void>>(
       `${this.baseUrl}/${breakId}`,
       { headers: this.getAuthHeaders() }
     );
   }
 }
+
