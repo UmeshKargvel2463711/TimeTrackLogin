@@ -1,0 +1,7 @@
+<div class="toast-wrapper">
+  <div *ngFor="let t of toasts()" class="toast" [ngClass]="t.type" [attr.data-toast-id]="t.id">
+    <span class="icon">{{ icon(t.type) }}</span>
+    <span class="message">{{ t.message }}</span>
+    <button class="close" (click)="close(t.id)" aria-label="Dismiss">✕</button>
+  </div>
+</div>

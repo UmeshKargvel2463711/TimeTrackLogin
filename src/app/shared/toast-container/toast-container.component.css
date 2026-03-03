@@ -1,0 +1,117 @@
+/* ===============================
+   Light Pastel Green Theme (compact)
+   =============================== */
+
+:host {
+  /* ▶ Base light green from your image */
+  --toast-light-green: #E6F5D6;        /* solid pastel */
+  --toast-light-green-weak: rgba(230, 245, 214, 0.78); /* semi-transparent */
+
+  /* Text on light backgrounds (deep green for contrast) */
+  --toast-fg: #103a12;
+  --toast-fg-dim: #17381a;
+  --toast-fg-strong: #0b2a0d;
+
+  /* Keep your compact sizing from earlier */
+  --toast-radius: 10px;
+  --toast-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  --toast-blur: 6px;
+  --toast-gap: 8px;
+  --toast-padding-y: 9px;
+  --toast-padding-x: 12px;
+  --toast-font-size: 0.88rem;
+  --toast-icon-size: 18px;
+  --toast-enter: 0.22s;
+  --toast-exit: 0.18s;
+
+  /* Borders for definition on pale bg */
+  --toast-border: rgba(16, 58, 18, 0.10);
+}
+
+/* Wrapper stays same (compact top-right) */
+.toast-wrapper {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: var(--toast-gap);
+  pointer-events: none;
+  padding: 0 2px;
+}
+@media (max-width: 480px) {
+  .toast-wrapper { top: 8px; left: 10px; right: 10px; }
+}
+
+/* Toast base (unchanged layout, smaller footprint) */
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: min(92vw, 280px);
+  max-width: min(92vw, 380px);
+  padding: var(--toast-padding-y) var(--toast-padding-x);
+  border-radius: var(--toast-radius);
+
+  color: var(--toast-fg);
+  font-size: var(--toast-font-size);
+  line-height: 1.3;
+
+  backdrop-filter: blur(var(--toast-blur));
+  -webkit-backdrop-filter: blur(var(--toast-blur));
+  box-shadow: var(--toast-shadow);
+  border: 1px solid var(--toast-border);
+
+  transform: translateY(-6px) scale(0.985);
+  opacity: 0;
+  animation: toast-in var(--toast-enter) ease-out forwards;
+}
+
+/* ✅ All types use your light green now */
+.toast.success { background: var(--toast-light-green); }
+.toast.info    { background: var(--toast-light-green-weak); }
+.toast.warning { background: var(--toast-light-green-weak); }
+.toast.error   { background: var(--toast-light-green-weak); }
+
+/* If you prefer a small hue hint per type, uncomment:
+.toast.error   { background: linear-gradient(135deg, rgba(230,245,214,0.78), rgba(239,68,68,0.08)); }
+.toast.warning { background: linear-gradient(135deg, rgba(230,245,214,0.78), rgba(245,158,11,0.08)); }
+.toast.info    { background: linear-gradient(135deg, rgba(230,245,214,0.78), rgba(37,99,235,0.08)); }
+*/
+
+/* Parts */
+.icon {
+  font-size: var(--toast-icon-size);
+  line-height: 1;
+  color: var(--toast-fg-strong);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.06));
+}
+.message { flex: 1; color: var(--toast-fg-dim); font-weight: 500; }
+
+/* Close button tuned for pale bg */
+.close {
+  appearance: none;
+  background: rgba(16, 58, 18, 0.06);
+  border: 1px solid rgba(16, 58, 18, 0.16);
+  color: var(--toast-fg-strong);
+  width: 26px; height: 26px; border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer;
+  transition: background .16s, transform .08s ease;
+}
+.close:hover  { background: rgba(16, 58, 18, 0.10); transform: scale(1.04); }
+.close:active { transform: scale(0.96); }
+.close:focus-visible { outline: 2px solid rgba(16,58,18,0.45); outline-offset: 2px; }
+
+/* Animations (unchanged) */
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.toast.closing { animation: toast-out var(--toast-exit) ease-in forwards; }
+@keyframes toast-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-6px) scale(0.985); } }
+
+/* High-contrast mode */
+@media (forced-colors: active) {
+  .toast { background: CanvasText !important; color: Canvas !important; border: 1px solid ButtonText !important; box-shadow: none !important; }
+  .close { background: ButtonFace !important; color: ButtonText !important; border: 1px solid ButtonText !important; }
+}
