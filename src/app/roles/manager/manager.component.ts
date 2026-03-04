@@ -41,7 +41,6 @@ export class ManagerComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('🔄 ManagerComponent initialized - Loading all data');
 
     // Navbar user info - Get from AuthService first (for immediate display on refresh)
     const authUser = this.authService.currentUser();
@@ -78,13 +77,6 @@ export class ManagerComponent implements OnInit {
 
       // Always update activeTasks count
       this.activeTasks = activeTasks;
-
-      console.log('📊 Dashboard metrics updated:', {
-        total: totalTasks,
-        completed: completedTasks,
-        active: activeTasks,
-        completionRate: this.completionRate
-      });
     });
 
     // Force refresh data to ensure it loads
@@ -104,7 +96,6 @@ export class ManagerComponent implements OnInit {
     // Force check after delay if data is still 0
     setTimeout(() => {
       if (this.activeTasks === 0 && this.completionRate === 0) {
-        console.log('⚠️ No data loaded, forcing refresh...');
         this.dataService.refreshData();
       }
     }, 1500);
@@ -116,7 +107,6 @@ export class ManagerComponent implements OnInit {
   private loadManagerStats(): void {
     const managerId = this.getCurrentManagerId();
     if (!managerId) {
-      console.warn('⚠️ Cannot load manager stats - managerId not found');
       return;
     }
 
@@ -135,12 +125,10 @@ export class ManagerComponent implements OnInit {
           }
           console.log('✅ Manager stats loaded (teamCount only):', stats);
         } else if (response && !response.success) {
-          console.warn('⚠️ Manager stats API returned unsuccessfully');
           this.fallbackToOldStats();
         }
       },
       error: (err) => {
-        console.error('❌ Error loading manager stats, using fallback:', err);
         this.fallbackToOldStats();
       }
     });

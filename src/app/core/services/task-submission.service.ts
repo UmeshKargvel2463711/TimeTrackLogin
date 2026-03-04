@@ -29,7 +29,6 @@ export class TaskSubmissionService {
                 try {
                     return JSON.parse(stored);
                 } catch (e) {
-                    console.error('Error parsing submissions from localStorage:', e);
                     return [];
                 }
             }
@@ -44,9 +43,7 @@ export class TaskSubmissionService {
         if (typeof window !== 'undefined' && window.localStorage) {
             try {
                 localStorage.setItem('task_submissions', JSON.stringify(submissions));
-                console.log('Task submissions saved to localStorage:', submissions.length);
             } catch (e) {
-                console.error('Error saving submissions to localStorage:', e);
             }
         }
     }
@@ -58,7 +55,6 @@ export class TaskSubmissionService {
         // Try to load from localStorage first for better UX
         const storedSubmissions = this.loadSubmissionsFromStorage();
         if (storedSubmissions.length > 0) {
-            console.log('Loaded submissions from localStorage:', storedSubmissions.length);
             this.submissionsSubject.next(storedSubmissions);
         } else if (this.initialSubmissions.length > 0) {
             this.submissionsSubject.next(this.initialSubmissions);
@@ -123,9 +119,7 @@ export class TaskSubmissionService {
         // Also update the task status to Completed
         const submission = this.getSubmissionById(submissionId);
         if (submission && submission.taskId) {
-            console.log('TaskSubmissionService - Approving submission, updating task:', submission.taskId, 'to Completed');
             this.taskService.updateTaskStatus(submission.taskId, 'Completed');
-            console.log('TaskSubmissionService - Task status updated to Completed');
         }
     }
 
@@ -216,3 +210,4 @@ export class TaskSubmissionService {
         return this.submissionsSubject.value.filter(sub => sub.approvalStatus === status).length;
     }
 }
+

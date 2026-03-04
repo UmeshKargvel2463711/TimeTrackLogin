@@ -111,7 +111,6 @@ export class NotificationService {
       .pipe(
         tap(notifications => this.notificationsSubject.next(notifications || [])),
         catchError(error => {
-          console.error('Error fetching notifications:', error);
           return of([]);
         })
       );
@@ -126,7 +125,6 @@ export class NotificationService {
           this.unreadCountSubject.next(notifications?.length || 0);
         }),
         catchError(error => {
-          console.error('Error fetching unread notifications:', error);
           return of([]);
         })
       );
@@ -139,7 +137,6 @@ export class NotificationService {
         map(response => response?.count || 0),
         tap(count => this.unreadCountSubject.next(count)),
         catchError(error => {
-          console.error('Error fetching unread count:', error);
           return of(0);
         })
       );
@@ -152,7 +149,6 @@ export class NotificationService {
         map(() => true),
         tap(() => this.refreshNotifications()),
         catchError(error => {
-          console.error('Error marking notification as read:', error);
           return of(false);
         })
       );
@@ -165,7 +161,6 @@ export class NotificationService {
         map(() => true),
         tap(() => this.refreshNotifications()),
         catchError(error => {
-          console.error('Error marking all as read:', error);
           return of(false);
         })
       );

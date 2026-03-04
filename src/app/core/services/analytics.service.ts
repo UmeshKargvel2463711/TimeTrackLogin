@@ -33,7 +33,6 @@ export class AnalyticsService {
    * Handle HTTP errors
    */
   private handleError(error: any): Observable<never> {
-    console.error('Analytics API Error:', error);
     throw error;
   }
 
@@ -50,13 +49,10 @@ export class AnalyticsService {
     
     if (params.length > 0) url += '?' + params.join('&');
 
-    console.log('📊 AnalyticsService.getTeamSummary - Fetching:', url);
-
     return this.http.get<ApiResponse<TeamSummaryDto>>(url, { 
       headers: this.getHeaders() 
     }).pipe(
       tap((response) => {
-        console.log('✅ Team summary loaded:', response);
       }),
       catchError(this.handleError)
     );
@@ -73,13 +69,10 @@ export class AnalyticsService {
   ): Observable<ApiResponse<TeamHoursTrendDto>> {
     const url = `${this.apiUrl}/team-hours-trend?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&groupBy=${groupBy}`;
 
-    console.log('📊 AnalyticsService.getTeamHoursTrend - Fetching:', url);
-
     return this.http.get<ApiResponse<TeamHoursTrendDto>>(url, { 
       headers: this.getHeaders() 
     }).pipe(
       tap((response) => {
-        console.log('✅ Team hours trend loaded:', response);
       }),
       catchError(this.handleError)
     );
@@ -98,13 +91,10 @@ export class AnalyticsService {
     
     if (params.length > 0) url += '?' + params.join('&');
 
-    console.log('📊 AnalyticsService.getTeamMemberPerformance - Fetching:', url);
-
     return this.http.get<ApiResponse<TeamMemberPerformanceDto>>(url, { 
       headers: this.getHeaders() 
     }).pipe(
       tap((response) => {
-        console.log('✅ Team member performance loaded:', response);
       }),
       catchError(this.handleError)
     );
@@ -123,15 +113,13 @@ export class AnalyticsService {
     
     if (params.length > 0) url += '?' + params.join('&');
 
-    console.log('📊 AnalyticsService.getTaskCompletionBreakdown - Fetching:', url);
-
     return this.http.get<ApiResponse<TaskCompletionBreakdownDto>>(url, { 
       headers: this.getHeaders() 
     }).pipe(
       tap((response) => {
-        console.log('✅ Task completion breakdown loaded:', response);
       }),
       catchError(this.handleError)
     );
   }
 }
+

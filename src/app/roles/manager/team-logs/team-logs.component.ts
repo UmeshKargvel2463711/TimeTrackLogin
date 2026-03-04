@@ -49,7 +49,6 @@ export class TeamLogsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const managerId = this.getCurrentManagerId();
     if (!managerId) {
-      console.warn('No managerId in session');
       return;
     }
 
@@ -91,7 +90,6 @@ export class TeamLogsComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error('Error loading team logs:', err);
           if (err.status === 404) {
             this.allLogs = [];
             this.filteredLogs = [];

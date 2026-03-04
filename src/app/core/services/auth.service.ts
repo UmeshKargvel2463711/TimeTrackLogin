@@ -55,13 +55,10 @@ export class AuthService {
       // Store token separately for easy access by ApiService
       if (user.token) {
         localStorage.setItem('token', user.token);
-        console.log('✅ AuthService - Token saved to localStorage');
       } else if (user.accessToken) {
         localStorage.setItem('token', user.accessToken);
-        console.log('✅ AuthService - Access token saved to localStorage');
       } else if (user.jwtToken) {
         localStorage.setItem('token', user.jwtToken);
-        console.log('✅ AuthService - JWT token saved to localStorage');
       } else {
         console.warn('⚠️ AuthService - No token found in user object:', Object.keys(user));
       }

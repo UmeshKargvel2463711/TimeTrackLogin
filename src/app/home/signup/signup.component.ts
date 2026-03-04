@@ -74,7 +74,6 @@ export class SignupComponent {
       // Call backend API - registration goes to pending approval
       this.authService.registerAsync(userData).subscribe({
         next: (response: any) => {
-          console.log('Registration response:', response);
           this.isSubmitting = false;
 
           // Check if registration is pending approval
@@ -92,7 +91,6 @@ export class SignupComponent {
           this.router.navigate(['/signin']);
         },
         error: (err: any) => {
-          console.error('Registration failed:', err);
           this.isSubmitting = false;
 
           if (err.error?.errors) {

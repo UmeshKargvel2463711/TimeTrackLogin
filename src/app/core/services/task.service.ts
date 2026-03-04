@@ -48,10 +48,8 @@ export class TaskService {
         // Load stored tasks synchronously first
         const storedTasks = this.loadTasksFromStorage();
         if (storedTasks.length > 0) {
-            console.log('✅ TaskService - Loaded tasks from localStorage:', storedTasks.length);
             this.tasksSubject.next(storedTasks);
         } else {
-            console.log('ℹ️ TaskService - No cached tasks found');
             this.tasksSubject.next([]);
         }
 
@@ -70,7 +68,6 @@ export class TaskService {
                 try {
                     return JSON.parse(stored);
                 } catch (e) {
-                    console.error('Error parsing tasks from localStorage:', e);
                     return [];
                 }
             }
@@ -85,9 +82,7 @@ export class TaskService {
         if (typeof window !== 'undefined' && window.localStorage) {
             try {
                 localStorage.setItem('tasks', JSON.stringify(tasks));
-                console.log('Tasks saved to localStorage:', tasks.length);
             } catch (e) {
-                console.error('Error saving tasks to localStorage:', e);
             }
         }
     }
@@ -96,7 +91,6 @@ export class TaskService {
      * Load tasks from API (manual call only - use refresh button)
      */
     private loadTasks(): void {
-        console.log('🔄 TaskService - Loading tasks from API...');
 
         // Try to fetch from API and update (only if API has data)
         this.apiService.getTasks().subscribe({
@@ -105,15 +99,12 @@ export class TaskService {
                     // Only update if API returned data
                     this.tasksSubject.next(tasks);
                     this.saveTasksToStorage(tasks);
-                    console.log('✅ TaskService - Loaded tasks from API:', tasks.length);
                 } else {
                     // API returned empty, keep current data
-                    console.log('ℹ️ TaskService - API returned no tasks');
                 }
             },
             error: (err) => {
                 // API failed, keep localStorage/initial data
-                console.error('❌ TaskService - Failed to load tasks from API:', err);
                 // Fallback to localStorage
                 const storedTasks = this.loadTasksFromStorage();
                 if (storedTasks.length > 0) {
@@ -134,7 +125,6 @@ export class TaskService {
      * Manually refresh tasks from API (call from components when authenticated)
      */
     refreshTasks(): void {
-        console.log('🔄 TaskService.refreshTasks - Reloading tasks from API');
         this.loadTasks();
     }
 
@@ -143,7 +133,6 @@ export class TaskService {
      * Calls GET /api/Task/my-tasks
      */
     getMyTasks(): Observable<any[]> {
-        console.log('📡 TaskService.getMyTasks - Fetching tasks assigned to current user');
         return this.apiService.getMyTasks();
     }
 
@@ -192,24 +181,17 @@ export class TaskService {
         task.createdDate = new Date();
         task.assignedDate = new Date();
 
-        console.log('TaskService.addTask - Creating task:', task);
-
         this.apiService.createTask(task).subscribe({
             next: (newTask: any) => {
-                console.log('TaskService.addTask - API response:', newTask);
                 const currentTasks = this.tasksSubject.value;
                 const updatedTasks = [newTask, ...currentTasks];
-                console.log('TaskService.addTask - Updated tasks:', updatedTasks);
                 this.tasksSubject.next(updatedTasks);
                 this.saveTasksToStorage(updatedTasks);
-                console.log('TaskService.addTask - Saved to localStorage');
             },
             error: (err) => {
-                console.error('TaskService.addTask - API error:', err);
                 // Fallback: Create task locally and save to localStorage
                 const currentTasks = this.tasksSubject.value;
                 const updatedTasks = [task, ...currentTasks];
-                console.log('TaskService.addTask - Using fallback, updated tasks:', updatedTasks);
                 this.tasksSubject.next(updatedTasks);
                 this.saveTasksToStorage(updatedTasks);
             }
@@ -270,7 +252,6 @@ export class TaskService {
      * Update task status
      */
     updateTaskStatus(id: string, status: 'Pending' | 'In Progress' | 'Completed') {
-        console.log('TaskService.updateTaskStatus - Updating task', id, 'to status:', status);
         this.updateTask(id, { status });
     }
 
@@ -281,14 +262,12 @@ export class TaskService {
     updateTaskById(id: any, taskData: any): Observable<any> {
         // Guard against undefined/null
         if (id === undefined || id === null) {
-            console.error('TaskService.updateTaskById - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('TaskService.updateTaskById - Updating task', taskId, 'with data:', taskData);
         return this.apiService.updateTask(taskId, taskData);
     }
 
@@ -299,14 +278,12 @@ export class TaskService {
     deleteTaskById(id: any): Observable<any> {
         // Guard against undefined/null
         if (id === undefined || id === null) {
-            console.error('TaskService.deleteTaskById - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('TaskService.deleteTaskById - Deleting task', taskId);
         return this.apiService.deleteTask(taskId);
     }
 
@@ -323,17 +300,14 @@ export class TaskService {
      */
     startTask(id: any): Observable<any> {
         if (id === undefined || id === null) {
-            console.error('TaskService.startTask - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('📡 TaskService.startTask - Starting task', taskId);
         return this.apiService.startTask(taskId).pipe(
             tap((response: any) => {
-                console.log('✅ TaskService.startTask - Response:', response);
                 // Update local state
                 this.updateTaskStatus(taskId, 'In Progress');
             })
@@ -346,17 +320,14 @@ export class TaskService {
      */
     completeTask(id: any, hoursSpent: number = 0, comments: string = ''): Observable<any> {
         if (id === undefined || id === null) {
-            console.error('TaskService.completeTask - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('📡 TaskService.completeTask - Completing task', taskId, 'with hours:', hoursSpent);
         return this.apiService.completeTask(taskId, hoursSpent, comments).pipe(
             tap((response: any) => {
-                console.log('✅ TaskService.completeTask - Response:', response);
                 // Update local state
                 this.updateTaskStatus(taskId, 'Completed');
             })
@@ -369,14 +340,12 @@ export class TaskService {
      */
     approveTaskCompletion(id: any, approvalComments: string = ''): Observable<any> {
         if (id === undefined || id === null) {
-            console.error('TaskService.approveTaskCompletion - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('📡 TaskService.approveTaskCompletion - Approving task', taskId);
         return this.apiService.approveTaskCompletion(taskId, approvalComments);
     }
 
@@ -386,14 +355,12 @@ export class TaskService {
      */
     rejectTask(id: any, reason: string): Observable<any> {
         if (id === undefined || id === null) {
-            console.error('TaskService.rejectTask - ID is undefined or null');
             return new Observable(observer => {
                 observer.error({ error: { message: 'Task ID is missing' } });
             });
         }
 
         const taskId = String(id);
-        console.log('📡 TaskService.rejectTask - Rejecting task', taskId);
         return this.apiService.rejectTask(taskId, reason);
     }
 
@@ -402,10 +369,8 @@ export class TaskService {
      * Calls POST /api/Task/log-time
      */
     logTaskTime(dto: any): Observable<any> {
-        console.log('📡 TaskService.logTaskTime - Logging time:', dto);
         return this.apiService.logTaskTime(dto).pipe(
             tap((response: any) => {
-                console.log('✅ TaskService.logTaskTime - Response:', response);
             })
         );
     }
@@ -415,10 +380,8 @@ export class TaskService {
      * Calls GET /api/Task/pending-approval
      */
     getPendingApprovalTasks(): Observable<any> {
-        console.log('📡 TaskService.getPendingApprovalTasks - Fetching pending approval tasks');
         return this.apiService.getPendingApprovalTasks().pipe(
             tap((response: any) => {
-                console.log('✅ TaskService.getPendingApprovalTasks - Response:', response);
             })
         );
     }
@@ -428,37 +391,10 @@ export class TaskService {
      * Calls GET /api/Task/overdue
      */
     getOverdueTasks(): Observable<any> {
-        console.log('📡 TaskService.getOverdueTasks - Fetching overdue tasks');
         return this.apiService.getOverdueTasks().pipe(
             tap((response: any) => {
-                console.log('✅ TaskService.getOverdueTasks - Response:', response);
-            })
-        );
-    }
-
-    /**
-     * Get productivity data for current employee
-     * Calls GET /api/Productivity
-     */
-    getProductivity(): Observable<any> {
-        console.log('📡 TaskService.getProductivity - Fetching productivity data');
-        return this.apiService.getProductivity().pipe(
-            tap((response: any) => {
-                console.log('✅ TaskService.getProductivity - Response:', response);
-            })
-        );
-    }
-
-    /**
-     * Get productivity data for specific employee by ID
-     * Calls GET /api/Productivity/{employeeId}
-     */
-    getEmployeeProductivity(employeeId: string): Observable<any> {
-        console.log('📡 TaskService.getEmployeeProductivity - Fetching productivity data for employee:', employeeId);
-        return this.apiService.getEmployeeProductivity(employeeId).pipe(
-            tap((response: any) => {
-                console.log('✅ TaskService.getEmployeeProductivity - Response:', response);
             })
         );
     }
 }
+

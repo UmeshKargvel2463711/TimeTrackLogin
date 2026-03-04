@@ -42,15 +42,12 @@ export class ApiService {
             token = user.token || user.accessToken || user.jwtToken;
           }
         } catch (e) {
-          console.error('Error parsing user session:', e);
+          // Silently fail - token not found in session
         }
       }
 
       if (token) {
-        console.log('✅ ApiService.getHeaders - Token found, adding Authorization header');
         headers = headers.set('Authorization', `Bearer ${token}`);
-      } else {
-        console.warn('⚠️ ApiService.getHeaders - No token found in localStorage');
       }
     }
 
@@ -61,7 +58,6 @@ export class ApiService {
    * Handle API errors
    */
   private handleError(error: any): Observable<any> {
-    console.error('API Error:', error);
     return of(null);
   }
 
@@ -78,17 +74,11 @@ export class ApiService {
 
     // Only fetch in browser (SSR has certificate issues with self-signed certs)
     if (!isPlatformBrowser(this.platformId)) {
-      console.log('⚠️ ApiService - Skipping getUsers in SSR');
       return of([]);
     }
 
-    console.log('📡 ApiService - Fetching users from:', `${this.apiUrl}/User/all`);
-
     return this.http.get<any>(`${this.apiUrl}/User/all`, { headers: this.getHeaders() })
       .pipe(
-        tap((response: any) => {
-          console.log('📥 ApiService - Users raw response:', JSON.stringify(response));
-        }),
         map((response: any) => {
 
           // Handle different response formats from backend
@@ -105,11 +95,9 @@ export class ApiService {
 
           // Filter out null/undefined users - check both id and userId
           users = users.filter(u => u != null && (u.id != null || u.userId != null));
-          console.log('✅ ApiService - Parsed users:', users.length, users);
           return users;
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching users:', err);
           return of([]);
         })
       );
@@ -125,11 +113,7 @@ export class ApiService {
 
     return this.http.get<any>(`${this.apiUrl}/User/profile`, { headers: this.getHeaders() })
       .pipe(
-        tap((response: any) => {
-          console.log('✅ ApiService - User profile response:', response);
-        }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching user profile:', err);
           return of(null);
         })
       );
@@ -152,10 +136,9 @@ export class ApiService {
       const team = res?.data ?? res ?? [];
       return Array.isArray(team) ? team : [];
     }),
-    tap(team => console.log('✅ getMyTeam →', team)),
+    tap(team => console.log('? getMyTeam ?', team)),
     catchError(err => {
-      console.error('❌ getMyTeam error:', err);
-      return of([]); // return empty so UI doesn’t break
+      return of([]); // return empty so UI doesn�t break
     })
   );
 }
@@ -175,11 +158,7 @@ export class ApiService {
 
     return this.http.get<any[]>(`${this.apiUrl}/User/department/${encodeURIComponent(department)}`, { headers: this.getHeaders() })
       .pipe(
-        tap((response: any) => {
-          console.log('✅ ApiService - Users by department response:', response);
-        }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching users by department:', err);
           return of([]);
         })
       );
@@ -196,11 +175,7 @@ export class ApiService {
 
     return this.http.patch<any>(`${this.apiUrl}/User/${userId}/deactivate`, {}, { headers: this.getHeaders() })
       .pipe(
-        tap((response: any) => {
-          console.log('✅ ApiService - User deactivated:', response);
-        }),
         catchError(err => {
-          console.error('❌ ApiService - Error deactivating user:', err);
           return of({ success: false });
         })
       );
@@ -217,11 +192,7 @@ export class ApiService {
 
     return this.http.patch<any>(`${this.apiUrl}/User/${userId}/activate`, {}, { headers: this.getHeaders() })
       .pipe(
-        tap((response: any) => {
-          console.log('✅ ApiService - User activated:', response);
-        }),
         catchError(err => {
-          console.error('❌ ApiService - Error activating user:', err);
           return of({ success: false });
         })
       );
@@ -269,15 +240,12 @@ export class ApiService {
    * Always calls API - no mock data
    */
   updateUser(id: string, user: any): Observable<any> {
-    console.log('📡 ApiService - Calling PUT /api/User/' + id, user);
     return this.http.put<any>(`${this.apiUrl}/User/${id}`, user, { headers: this.getHeaders() })
       .pipe(
         map((response: any) => {
-          console.log('✅ ApiService - User update response:', response);
           return response.data || response;
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error updating user:', err);
           return this.handleError(err);
         })
       );
@@ -327,12 +295,9 @@ export class ApiService {
     if (params.length > 0) {
       url += '?' + params.join('&');
     }
-
-    console.log('📡 ApiService - Fetching time logs from:', url);
     return this.http.get<any>(`${url}`, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('📥 ApiService - Time logs response:', response);
         }),
         map((response: any) => {
           // Handle ApiResponseDto wrapper
@@ -342,7 +307,6 @@ export class ApiService {
           return Array.isArray(response) ? response : [];
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching time logs:', err);
           return of([]);
         })
       );
@@ -380,12 +344,9 @@ export class ApiService {
     if (this.useMockForTimeLogs) {
       return of({ ...data, id: `log_${Date.now()}` });
     }
-
-    console.log('📡 ApiService - Creating time log:', data);
     return this.http.post<any>(`${this.apiUrl}/TimeLog`, data, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Time log created:', response);
         }),
         map((response: any) => {
           // Handle ApiResponseDto wrapper
@@ -395,7 +356,6 @@ export class ApiService {
           return response;
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error creating time log:', err);
           return this.handleError(err);
         })
       );
@@ -409,12 +369,9 @@ export class ApiService {
     if (this.useMockForTimeLogs) {
       return of(data);
     }
-
-    console.log(`📡 ApiService - Updating time log ${id}:`, data);
     return this.http.put<any>(`${this.apiUrl}/TimeLog/${id}`, data, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Time log updated:', response);
         }),
         map((response: any) => {
           // Handle ApiResponseDto wrapper
@@ -424,7 +381,6 @@ export class ApiService {
           return response;
         }),
         catchError(err => {
-          console.error(`❌ ApiService - Error updating time log ${id}:`, err);
           return this.handleError(err);
         })
       );
@@ -446,7 +402,6 @@ export class ApiService {
             return of(JSON.parse(stored));
           }
         } catch (e) {
-          console.error('Error loading tasks from storage:', e);
         }
       }
       return of([]);
@@ -478,7 +433,6 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/Task/created-by-me`, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Tasks created by me:', response);
         }),
         map((response: any) => {
           // Handle different response formats
@@ -498,7 +452,6 @@ export class ApiService {
           }));
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching tasks created by me:', err);
           return of([]);
         })
       );
@@ -513,12 +466,9 @@ export class ApiService {
       return of([]);
     }
 
-    console.log('📡 ApiService - Fetching my tasks from:', `${this.apiUrl}/Task/my-tasks`);
-
     return this.http.get<any>(`${this.apiUrl}/Task/my-tasks`, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('📥 ApiService - My tasks raw response:', response);
         }),
         map((response: any) => {
           // Handle different response formats
@@ -538,7 +488,6 @@ export class ApiService {
           }));
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error fetching my tasks:', err);
           return of([]);
         })
       );
@@ -590,15 +539,11 @@ export class ApiService {
     }
     const url = `${this.apiUrl}/Task/${id}/start`;
 
-    console.log('📡 ApiService.startTask - Making PATCH request to:', url);
-
     return this.http.patch<any>(url, {}, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Task started:', response);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error starting task:', err);
           return this.handleError(err);
         })
       );
@@ -614,15 +559,11 @@ export class ApiService {
     }
     const url = `${this.apiUrl}/Task/${id}/complete`;
 
-    console.log('📡 ApiService.completeTask - Making PATCH request to:', url);
-
     return this.http.patch<any>(url, {}, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Task completed:', response);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error completing task:', err);
           return this.handleError(err);
         })
       );
@@ -641,10 +582,8 @@ export class ApiService {
     return this.http.patch<any>(url, {}, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Task approved:', response);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error approving task:', err);
           return this.handleError(err);
         })
       );
@@ -658,15 +597,11 @@ export class ApiService {
     const url = `${this.apiUrl}/Task/${id}/reject`;
     const payload = { reason };
 
-    console.log('📡 ApiService.rejectTask - Making PATCH request to:', url);
-
     return this.http.patch<any>(url, payload, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Task rejected:', response);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error rejecting task:', err);
           return this.handleError(err);
         })
       );
@@ -679,15 +614,11 @@ export class ApiService {
   logTaskTime(dto: any): Observable<any> {
     const url = `${this.apiUrl}/Task/log-time`;
 
-    console.log('📡 ApiService.logTaskTime - Making POST request to:', url);
-
     return this.http.post<any>(url, dto, { headers: this.getHeaders() })
       .pipe(
         tap((response: any) => {
-          console.log('✅ ApiService - Time logged:', response);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error logging time:', err);
           return this.handleError(err);
         })
       );
@@ -709,10 +640,8 @@ export class ApiService {
           return tasks;
         }),
         tap((tasks: any) => {
-          console.log('✅ ApiService - Pending approval tasks:', tasks);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error getting pending tasks:', err);
           return this.handleError(err);
         })
       );
@@ -734,10 +663,8 @@ export class ApiService {
           return tasks;
         }),
         tap((tasks: any) => {
-          console.log('✅ ApiService - Overdue tasks:', tasks);
         }),
         catchError(err => {
-          console.error('❌ ApiService - Error getting overdue tasks:', err);
           return this.handleError(err);
         })
       );
@@ -755,19 +682,12 @@ export class ApiService {
    */
   getManagerStats(managerId: string): Observable<any> {
     if (!managerId) {
-      console.warn('⚠️ ApiService.getManagerStats - No managerId provided');
       return of(null);
     }
 
     const url = `${this.apiUrl}/Task/manager-stats?managerId=${encodeURIComponent(managerId)}`;
-    console.log('📡 ApiService.getManagerStats - Making GET request to:', url);
 
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getManagerStats - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getManagerStats - Error:', err);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(err => {
         return of(null);
       })
     );
@@ -779,19 +699,12 @@ export class ApiService {
    */
   getEmployeeStats(employeeId: string): Observable<any> {
     if (!employeeId) {
-      console.warn('⚠️ ApiService.getEmployeeStats - No employeeId provided');
       return of(null);
     }
 
     const url = `${this.apiUrl}/Task/employee-stats?employeeId=${encodeURIComponent(employeeId)}`;
-    console.log('📡 ApiService.getEmployeeStats - Making GET request to:', url);
 
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getEmployeeStats - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getEmployeeStats - Error:', err);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(err => {
         return of(null);
       })
     );
@@ -803,14 +716,8 @@ export class ApiService {
    */
   getTaskTimeLogs(taskId: string): Observable<any> {
     const url = `${this.apiUrl}/Task/${taskId}/time-logs`;
-    console.log('📡 ApiService.getTaskTimeLogs - Making GET request to:', url);
 
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getTaskTimeLogs - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getTaskTimeLogs - Error:', err);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(err => {
         return of([]);
       })
     );
@@ -822,14 +729,8 @@ export class ApiService {
    */
   getTasksByStatus(status: string): Observable<any> {
     const url = `${this.apiUrl}/Task?status=${status}`;
-    console.log('📡 ApiService.getTasksByStatus - Making GET request to:', url);
 
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getTasksByStatus - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getTasksByStatus - Error:', err);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(err => {
         return of([]);
       })
     );
@@ -841,66 +742,13 @@ export class ApiService {
    */
   getTasksByEmployee(employeeId: string): Observable<any> {
     const url = `${this.apiUrl}/Task?assignedToUserId=${employeeId}`;
-    console.log('📡 ApiService.getTasksByEmployee - Making GET request to:', url);
 
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getTasksByEmployee - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getTasksByEmployee - Error:', err);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(err => {
         return of([]);
       })
     );
   }
 
-  /**
-   * Get productivity data for current employee
-   */
-  getProductivity(): Observable<any> {
-    const url = `${this.apiUrl}/Productivity`;
-    console.log('📡 ApiService.getProductivity - Making GET request to:', url);
-
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getProductivity - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getProductivity - Error fetching productivity data:', err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          url: err.url
-        });
-        throw err;
-      })
-    );
-  }
-
-  /**
-   * Get productivity data for specific employee by ID
-   */
-  getEmployeeProductivity(employeeId: string): Observable<any> {
-    const url = `${this.apiUrl}/Productivity/${employeeId}`;
-    console.log('📡 ApiService.getEmployeeProductivity - Making GET request to:', url);
-
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('✅ ApiService.getEmployeeProductivity - Response received:', response);
-      }),
-      catchError(err => {
-        console.error('❌ ApiService.getEmployeeProductivity - Error fetching productivity data:', err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          url: err.url
-        });
-        throw err;
-      })
-    );
-  }
 
   // ==================== ORGANIZATION ANALYTICS ENDPOINTS ====================
 
@@ -909,10 +757,8 @@ export class ApiService {
    * Backend endpoint: GET /api/Analytics/organization-summary
    */
   getOrganizationAnalytics(period: 7 | 14 | 30 | 90 = 7): Observable<any> {
-    console.log(`📡 ApiService - Fetching organization analytics with period: ${period}`);
 
     if (!isPlatformBrowser(this.platformId)) {
-      console.log('⚠️ ApiService - Skipping getOrganizationAnalytics in SSR');
       return of({
         statusCode: 200,
         data: {
@@ -944,85 +790,8 @@ export class ApiService {
       }
     ).pipe(
       tap((response: any) => {
-        console.log('✅ ApiService - Organization analytics response:', response);
       }),
       catchError((err: any) => {
-        console.error('❌ ApiService - Error fetching organization analytics:', err);
-        return this.handleError(err);
-      })
-    );
-  }
-
-  /**
-   * Get department-specific analytics
-   * Backend endpoint: GET /api/Analytics/department/{departmentName}
-   */
-  getDepartmentAnalytics(departmentName: string, startDate?: string, endDate?: string): Observable<any> {
-    console.log(`📡 ApiService - Fetching analytics for department: ${departmentName}`);
-
-    if (!isPlatformBrowser(this.platformId)) {
-      return of({
-        statusCode: 200,
-        data: {
-          departmentName,
-          employeeCount: 0,
-          totalHours: 0,
-          avgHoursPerEmployee: 0,
-          completedTasks: 0,
-          inProgressTasks: 0,
-          pendingTasks: 0,
-          employeeIds: []
-        }
-      });
-    }
-
-    const params: any = {};
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
-
-    return this.http.get<any>(
-      `${this.apiUrl}/Analytics/department/${encodeURIComponent(departmentName)}`,
-      {
-        params,
-        headers: this.getHeaders()
-      }
-    ).pipe(
-      tap((response: any) => {
-        console.log(`✅ ApiService - Department analytics for ${departmentName}:`, response);
-      }),
-      catchError((err: any) => {
-        console.error(`❌ ApiService - Error fetching department analytics:`, err);
-        return this.handleError(err);
-      })
-    );
-  }
-
-  /**
-   * Get hours trend data for charts
-   * Backend endpoint: GET /api/Analytics/hours-trend
-   */
-  getHoursTrend(days: 7 | 14 | 30 | 90 = 7): Observable<any> {
-    console.log(`📡 ApiService - Fetching hours trend for ${days} days`);
-
-    if (!isPlatformBrowser(this.platformId)) {
-      return of({
-        statusCode: 200,
-        data: []
-      });
-    }
-
-    return this.http.get<any>(
-      `${this.apiUrl}/Analytics/hours-trend`,
-      {
-        params: { days },
-        headers: this.getHeaders()
-      }
-    ).pipe(
-      tap((response: any) => {
-        console.log('✅ ApiService - Hours trend response:', response);
-      }),
-      catchError((err: any) => {
-        console.error('❌ ApiService - Error fetching hours trend:', err);
         return this.handleError(err);
       })
     );
@@ -1057,14 +826,12 @@ export class ApiService {
    * Backend endpoint: GET /api/Analytics/task-completion-breakdown
    */
   getTaskCompletionBreakdown(startDate?: string, endDate?: string): Observable<any> {
-    console.log('📡 ApiService - Fetching task completion breakdown');
 
     const params: any = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
 
     if (!isPlatformBrowser(this.platformId)) {
-      console.log('⚠️ ApiService - Skipping getTaskCompletionBreakdown in SSR');
       return of({
         success: true,
         data: {
@@ -1087,10 +854,8 @@ export class ApiService {
       }
     ).pipe(
       tap((response: any) => {
-        console.log('✅ ApiService - Task completion breakdown response:', response);
       }),
       catchError((err: any) => {
-        console.error('❌ ApiService - Error fetching task completion breakdown:', err);
         return this.handleError(err);
       })
     );
@@ -1103,3 +868,5 @@ export class ApiService {
     return this.apiUrl;
   }
 }
+
+

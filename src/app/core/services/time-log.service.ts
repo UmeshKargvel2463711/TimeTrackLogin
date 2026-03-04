@@ -225,13 +225,10 @@ export class TimeLogService {
         if (stored) {
           const logs = JSON.parse(stored);
           this.logsSubject.next(logs);
-          console.log('✅ TimeLogService - Loaded logs from localStorage:', logs.length);
         } else {
           this.logsSubject.next([]);
-          console.log('ℹ️ TimeLogService - No cached logs found');
         }
       } catch (e) {
-        console.error('❌ TimeLogService - Error loading from localStorage:', e);
         this.logsSubject.next([]);
       }
     }
@@ -241,7 +238,6 @@ export class TimeLogService {
    * Load time logs from API (manual call only - use refresh button)
    */
   private loadLogs(): void {
-    console.log('🔄 TimeLogService - Loading logs from API...');
     this.getUserTimeLogs().subscribe({
       next: (response) => {
         if (response.success && Array.isArray(response.data)) {
@@ -251,11 +247,9 @@ export class TimeLogService {
           if (typeof window !== 'undefined') {
             localStorage.setItem('time_logs', JSON.stringify(logs));
           }
-          console.log('✅ TimeLogService - Loaded logs from API:', logs.length);
         }
       },
       error: (err) => {
-        console.error('❌ TimeLogService - Error loading time logs:', err);
         // Fallback to localStorage
         this.loadLogsFromLocalStorage();
       }
@@ -365,7 +359,6 @@ export class TimeLogService {
         this.logsSubject.next([...current, newLog]);
       },
       error: (err) => {
-        console.error('Error creating time log:', err);
         // Fallback: update local store with original log
         const current = this.logsSubject.value;
         const fallbackLog: TimeLog = {
@@ -403,7 +396,6 @@ export class TimeLogService {
         this.logsSubject.next([...currentLogs]);
       },
       error: (err) => {
-        console.error('Error updating time log:', err);
         // Fallback: update local store anyway (remove if you want strict API)
         currentLogs[index] = payload;
         this.logsSubject.next([...currentLogs]);
@@ -520,7 +512,6 @@ export class TimeLogService {
       // Clear session
       localStorage.removeItem('timerSession');
     } catch (error) {
-      console.error('Error saving daily time log:', error);
     }
   }
 }

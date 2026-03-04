@@ -73,8 +73,6 @@ private loadTeamFromBackend() {
 
       this.assignedEmployeesNames = names;
       this.assignedEmployeesCount = names.length;
-
-      console.log('👥 Team names:', names);
     },
     error: () => {
       // This should rarely run because ApiService catchError returns [].

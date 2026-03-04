@@ -57,7 +57,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
   ) { }
 
   ngOnInit(): void {
-    console.log('📊 TeamAnalyticsComponent - Initializing with backend APIs');
     // Data will be loaded after charts are initialized in ngAfterViewInit
   }
 
@@ -67,17 +66,14 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       this.initCharts();
       // If charts initialized successfully, try to load data from backend
       if (this.chartsInitialized) {
-        console.log('📊 Charts initialized, attempting to load data from backend...');
         this.loadAllAnalytics();
       } else {
         // Retry chart initialization after a longer delay
-        console.warn('⚠️ Charts not initialized on first attempt, retrying...');
         setTimeout(() => {
           this.initCharts();
           if (this.chartsInitialized) {
             this.loadAllAnalytics();
           } else {
-            console.error('❌ Failed to initialize charts after retry');
           }
         }, 500);
       }
@@ -93,13 +89,10 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const managerId = this.getCurrentManagerId();
     if (!managerId) {
-      console.error('❌ Manager ID not found');
       this.notificationService.error('Unable to load analytics - Manager ID not found');
       this.loadMockData();
       return;
     }
-
-    console.log('📊 Loading analytics for manager:', managerId);
 
     // Use existing APIs: time logs and tasks created by manager
     // Note: getTasksCreatedByMe may fail with 403 if not authenticated
@@ -110,7 +103,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results) => {
-          console.log('✅ Raw data loaded:', results);
 
           const timeLogs = results.timeLogs.success ? results.timeLogs.data : [];
           const tasks = results.tasks || [];
@@ -121,10 +113,8 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
           this.loading = false;
         },
         error: (err) => {
-          console.error('❌ Error loading analytics:', err);
           this.error = null;
           // Try loading from localStorage as fallback
-          console.log('💡 Attempting to load from localStorage...');
           this.loadFromLocalStorage(managerId);
           this.loading = false;
         }
@@ -145,18 +135,14 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       if (storedTimeLogs) {
         try {
           timeLogs = JSON.parse(storedTimeLogs);
-          console.log('✅ Loaded time logs from localStorage:', timeLogs.length);
         } catch (e) {
-          console.error('Error parsing time logs from localStorage:', e);
         }
       }
 
       if (storedTasks) {
         try {
           tasks = JSON.parse(storedTasks);
-          console.log('✅ Loaded tasks from localStorage:', tasks.length);
         } catch (e) {
-          console.error('Error parsing tasks from localStorage:', e);
         }
       }
 
@@ -164,12 +150,10 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
         this.calculateAnalytics(timeLogs, tasks);
         this.notificationService.info('Loaded cached data from previous session');
       } else {
-        console.log('📊 No cached data found, loading sample data');
         this.notificationService.info('No data available - Using sample data');
         this.loadMockData();
       }
     } else {
-      console.log('📊 localStorage not available, loading sample data');
       this.loadMockData();
     }
   }
@@ -186,7 +170,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    * Calculate analytics from time logs and tasks
    */
   private calculateAnalytics(timeLogs: any[], tasks: any[]): void {
-    console.log('📊 Calculating analytics from', timeLogs.length, 'time logs and', tasks.length, 'tasks');
 
     // Calculate team summary
     const totalHours = timeLogs.reduce((sum, log) => sum + (log.hoursSpent || log.totalHours || 0), 0);
@@ -307,13 +290,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       this.updateMemberChart();
       this.updateCompletionChart();
     }, 100);
-
-    console.log('✅ Analytics calculated:', {
-      summary: this.teamSummary,
-      trend: this.hoursTrend.trendData.length,
-      members: this.memberPerformance.members.length,
-      breakdown: this.taskBreakdown
-    });
   }
 
   /**
@@ -331,21 +307,13 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    * Initialize all charts
    */
   private initCharts(): void {
-    console.log('📊 Attempting to initialize charts...');
 
     try {
       const trendCanvas = document.getElementById('trendChart');
       const memberCanvas = document.getElementById('memberChart');
       const completionCanvas = document.getElementById('completionChart');
 
-      console.log('Canvas elements found:', {
-        trend: !!trendCanvas,
-        member: !!memberCanvas,
-        completion: !!completionCanvas
-      });
-
       if (!trendCanvas || !memberCanvas || !completionCanvas) {
-        console.warn('⚠️ Chart canvases not found, will retry');
         this.chartsInitialized = false;
         return;
       }
@@ -463,10 +431,8 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       });
 
       this.chartsInitialized = true;
-      console.log('✅ Charts initialized');
 
     } catch (error) {
-      console.error('❌ Chart initialization error:', error);
     }
   }
 
@@ -475,13 +441,11 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   private updateTrendChart(): void {
     if (!this.trendChart || !this.chartsInitialized || !this.hoursTrend) {
-      console.warn('⚠️ Cannot update trend chart - chart not initialized or no data');
       return;
     }
 
     try {
       if (!this.hoursTrend.trendData || this.hoursTrend.trendData.length === 0) {
-        console.warn('⚠️ No trend data available');
         return;
       }
 
@@ -493,9 +457,7 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       this.trendChart.data.labels = labels;
       this.trendChart.data.datasets[0].data = data;
       this.trendChart.update('active');
-      console.log('✅ Trend chart updated with', data.length, 'data points');
     } catch (error) {
-      console.error('❌ Trend chart update error:', error);
     }
   }
 
@@ -504,13 +466,11 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   private updateMemberChart(): void {
     if (!this.memberChart || !this.chartsInitialized || !this.memberPerformance) {
-      console.warn('⚠️ Cannot update member chart - chart not initialized or no data');
       return;
     }
 
     try {
       if (!this.memberPerformance.members || this.memberPerformance.members.length === 0) {
-        console.warn('⚠️ No member performance data available');
         return;
       }
 
@@ -520,9 +480,7 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       this.memberChart.data.labels = labels;
       this.memberChart.data.datasets[0].data = data;
       this.memberChart.update('active');
-      console.log('✅ Member chart updated with', data.length, 'members');
     } catch (error) {
-      console.error('❌ Member chart update error:', error);
     }
   }
 
@@ -531,7 +489,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   private updateCompletionChart(): void {
     if (!this.completionChart || !this.chartsInitialized || !this.taskBreakdown) {
-      console.warn('⚠️ Cannot update completion chart - chart not initialized or no data');
       return;
     }
 
@@ -545,9 +502,7 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
 
       this.completionChart.data.datasets[0].data = data;
       this.completionChart.update('active');
-      console.log('✅ Completion chart updated:', data);
     } catch (error) {
-      console.error('❌ Completion chart update error:', error);
     }
   }
 
@@ -556,7 +511,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
    * Public method so it can be triggered from UI for testing
    */
   loadMockData(): void {
-    console.log('📊 Loading mock data for development...');
 
     // Clear loading and error states
     this.loading = false;
@@ -634,8 +588,6 @@ export class TeamAnalyticsComponent implements OnInit, AfterViewInit, OnDestroy 
       this.updateMemberChart();
       this.updateCompletionChart();
     }, 100);
-
-    console.log('✅ Mock data loaded successfully');
   }
 
   /**

@@ -143,10 +143,9 @@ export class UserService {
 
         this.usersSubject.next(mapped);
         this.saveUsersToStorage(mapped);
-        // console.log('✅ UserService - Loaded users:', mapped);
+        //
       },
       error: (err) => {
-        console.warn('⚠️ UserService - API failed, falling back to localStorage', err);
         this.loadUsersFromStorage();
       }
     });
@@ -154,7 +153,7 @@ export class UserService {
 
   /** Public refresh trigger */
   refreshUsers(): void {
-    // console.log('🔄 UserService - Refreshing users from API...');
+    //
     this.loadUsers();
   }
 
@@ -206,7 +205,6 @@ export class UserService {
     const existingIdx = current.findIndex(u => u.email.toLowerCase() === emailKey);
 
     if (existingIdx !== -1) {
-      console.warn(`User with email ${user.email} already exists. Updating existing user.`);
       this.updateUser(current[existingIdx].id!, user);
       return;
     }
@@ -221,7 +219,6 @@ export class UserService {
         this.refreshUsers();
       },
       error: (err) => {
-        console.error('Error creating user via API, storing locally as fallback:', err);
         const newUsers = [...current, user];
         this.usersSubject.next(newUsers);
         this.saveUsersToStorage(newUsers);
@@ -245,7 +242,7 @@ export class UserService {
       assignedEmployeeIds: updatedUser.assignedEmployees ?? []
     };
 
-    // console.log('📡 UserService - updateUser ->', id, dto);
+    //
 
     this.apiService.updateUser(id, dto).subscribe({
       next: () => this.refreshUsers(),
@@ -265,7 +262,6 @@ export class UserService {
     };
     return this.apiService.updateUser(id, dto).pipe(
       catchError(err => {
-        console.error('❌ updateUserRaw failed for', id, err);
         return of(null);
       })
     );
@@ -276,7 +272,6 @@ export class UserService {
     this.apiService.deactivateUser(id).subscribe({
       next: () => this.updateUser(id, { status: 'Inactive' }),
       error: (err) => {
-        console.error('❌ Error deactivating user:', err);
         // Fallback: still mark as inactive locally
         this.updateUser(id, { status: 'Inactive' });
       }
@@ -288,7 +283,6 @@ export class UserService {
     this.apiService.activateUser(id).subscribe({
       next: () => this.updateUser(id, { status: 'Active' }),
       error: (err) => {
-        console.error('❌ Error activating user:', err);
         // Fallback: still mark as active locally
         this.updateUser(id, { status: 'Active' });
       }
@@ -483,7 +477,6 @@ export class UserService {
       this.usersSubject.next(users);
       this.saveUsersToStorage(users); // persist migrated/deduped
     } catch (e) {
-      console.error('Error loading users from storage', e);
       this.usersSubject.next([]);
     }
   }
@@ -522,7 +515,6 @@ export class UserService {
         return user.id === userId;
       }
     } catch (err) {
-      console.error('Error checking active timer session:', err);
     }
     return false;
   }

@@ -24,8 +24,8 @@ export class NavbarComponent {
       block: 'start' 
     });
   } else {
-    console.warn(`Section with id "${sectionId}" not found!`);
   }
 }
 
 }
+

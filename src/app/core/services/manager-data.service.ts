@@ -53,16 +53,13 @@ export class ManagerDataService {
         if (storedLogs) {
           const logs = JSON.parse(storedLogs);
           this.logsSubject.next(logs);
-          console.log('✅ ManagerDataService - Loaded logs from localStorage:', logs.length);
         }
 
         if (storedTasks) {
           const tasks = JSON.parse(storedTasks);
           this.tasksSubject.next(tasks);
-          console.log('✅ ManagerDataService - Loaded tasks from localStorage:', tasks.length);
         }
       } catch (e) {
-        console.error('❌ ManagerDataService - Error loading from localStorage:', e);
       }
     }
   }
@@ -71,11 +68,9 @@ export class ManagerDataService {
    * Load all team data from backend APIs (manual call only)
    */
   private loadTeamData() {
-    console.log('📊 ManagerDataService - Loading team data from backend');
 
     this.getTeamDataFromBackend().subscribe(
       (data: any) => {
-        console.log('✅ ManagerDataService - Data loaded successfully');
         if (data.logs) {
           this.logsSubject.next(data.logs);
           // Save to localStorage
@@ -92,7 +87,6 @@ export class ManagerDataService {
         }
       },
       (err) => {
-        console.error('❌ ManagerDataService - Error loading data:', err);
       }
     );
   }
@@ -116,7 +110,6 @@ export class ManagerDataService {
    * Manually refresh team data from backend (call this from components when authenticated)
    */
   refreshTeamData(): void {
-    console.log('🔄 ManagerDataService - Manual refresh triggered');
     this.loadTeamData();
   }
 
@@ -196,7 +189,6 @@ export class ManagerDataService {
    * Refresh data manually
    */
   refreshData() {
-    console.log('🔄 ManagerDataService - Manually refreshing data');
     this.loadTeamData();
   }
 

@@ -20,3 +20,4 @@ export class NotFoundComponent {
     window.history.back();
   }
 }
+

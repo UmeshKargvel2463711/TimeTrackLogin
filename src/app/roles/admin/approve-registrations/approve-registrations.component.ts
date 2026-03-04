@@ -42,12 +42,10 @@ export class ApproveRegistrationsComponent implements OnInit {
       next: (registrations: PendingRegistration[]) => {
         this.isLoading = false;
         this.allRegistrations = registrations;
-        console.log('✅ Loaded registrations:', registrations);
       },
       error: (err: any) => {
         this.isLoading = false;
         this.errorMessage = 'Failed to load registrations.';
-        console.error('❌ Error:', err);
       }
     });
   }

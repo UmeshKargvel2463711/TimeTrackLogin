@@ -86,7 +86,6 @@ export class NotificationComponent implements OnInit, OnDestroy {
           // Already updated UI optimistically
         },
         error => {
-          console.error('Error marking notification as read:', error);
           // Revert optimistic update on error
           if (index > -1) {
             current[index].isRead = false;
@@ -109,7 +108,6 @@ export class NotificationComponent implements OnInit, OnDestroy {
         this.notificationApiService.loadNotifications();
       },
       error => {
-        console.error('Error marking all as read:', error);
         // Revert on error will be handled by loadNotifications
         this.notificationApiService.loadNotifications();
       }
@@ -126,10 +124,8 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notificationApiService.clearAllNotifications().subscribe(
       () => {
         // State already updated optimistically
-        console.log('All notifications cleared');
       },
       error => {
-        console.error('Error clearing notifications:', error);
         // Reload to sync state on error
         this.notificationApiService.loadNotifications();
       }
