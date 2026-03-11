@@ -858,6 +858,13 @@ export class TaskManagementComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Check if there are any approved tasks in filtered list
+   */
+  hasApprovedTasks(): boolean {
+    return this.filteredTasks.some(t => t.status === 'Approved');
+  }
+
+  /**
    * Get priority badge class
    */
   getPriorityClass(priority: string): string {

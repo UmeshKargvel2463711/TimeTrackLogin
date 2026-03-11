@@ -7,32 +7,38 @@ import { isPlatformBrowser } from '@angular/common';
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
-  
+
   // Only add token in browser
   if (!isPlatformBrowser(platformId)) {
     return next(req);
   }
 
-  // Get token from localStorage
+  let token: string | null = null;
+
+  // Try to get token from user_session object first
   const userSession = localStorage.getItem('user_session');
-  if (!userSession) {
-    return next(req);
+  if (userSession) {
+    try {
+      const user = JSON.parse(userSession);
+      token = user?.token || user?.accessToken || user?.jwtToken;
+    } catch (e) {
+      // Failed to parse, continue to next fallback
+    }
   }
 
-  try {
-    const user = JSON.parse(userSession);
-    const token = user?.token;
+  // Fallback to standalone token key if not found in user_session
+  if (!token) {
+    token = localStorage.getItem('token');
+  }
 
-    if (token) {
-      // Clone the request and add Authorization header
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      return next(authReq);
-    }
-  } catch (e) {
+  if (token) {
+    // Clone the request and add Authorization header
+    const authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return next(authReq);
   }
 
   return next(req);

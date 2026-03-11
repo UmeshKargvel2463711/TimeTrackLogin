@@ -17,14 +17,14 @@ Chart.register(...registerables);
   templateUrl: './personalreports.component.html',
   styleUrls: ['./personalreports.component.css']
 })
-export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestroy { 
+export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('barChart') barChartCanvas!: ElementRef;
   @ViewChild('pieChart') pieChartCanvas!: ElementRef;
 
   private timeLogService = inject(TimeLogService);
   private taskService = inject(TaskService);
   private authService = inject(AuthService);
-  
+
   // Subject for unsubscribing
   private destroy$ = new Subject<void>();
 
@@ -42,7 +42,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
   lastSevenDaysLabels: string[] = [];
   lastSevenDaysHours: number[] = [];
   taskStatusData = { completed: 0, inProgress: 0, pending: 0 };
-  
+
   // Demo mode flag - set to true to show sample data
   isDemoMode: boolean = false;
 
@@ -55,7 +55,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     this.loadProductivityData();
     // ALWAYS load time logs to ensure total hours is calculated
     this.loadTimeLogsForTotalHours();
-    
+
     // Force refresh after a short delay to ensure data is loaded
     setTimeout(() => {
       if (this.totalHoursLogged === 0) {
@@ -78,10 +78,10 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    */
   formatHours(hours: number): string {
     if (hours === 0) return '0m';
-    
+
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
-    
+
     if (wholeHours === 0) {
       return `${minutes}m`;
     } else if (minutes === 0) {
@@ -114,16 +114,16 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     if (!currentUser) {
       return;
     }
-    
+
     // Calculate date range for last 7 days
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 6); // Last 7 days including today
     sevenDaysAgo.setHours(0, 0, 0, 0);
-    
+
     const startDate = sevenDaysAgo.toISOString();
     const endDate = today.toISOString();
-    
+
     // Use getUserTimeLogs with date range to get last 7 days data
     this.timeLogService.getUserTimeLogs(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
@@ -137,12 +137,12 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
 
           if (logs.length > 0) {
             // Calculate total hours for last 7 days
-            const totalFromLogs = logs.reduce((sum: number, log: any) => 
+            const totalFromLogs = logs.reduce((sum: number, log: any) =>
               sum + (log.hoursSpent || log.totalHours || 0), 0);
-            
+
             this.totalHoursLogged = totalFromLogs;
             console.log('✅ Total hours logged (last 7 days):', this.totalHoursLogged);
-            
+
             // Calculate daily breakdown for chart
             this.calculateDailyHours(logs);
           } else {
@@ -156,7 +156,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
         }
       });
   }
-  
+
   /**
    * Calculate daily hours for the last 7 days from time logs
    */
@@ -164,38 +164,38 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     const today = new Date();
     this.lastSevenDaysLabels = [];
     this.lastSevenDaysHours = [];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       date.setHours(0, 0, 0, 0);
-      
+
       const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       this.lastSevenDaysLabels.push(dateStr);
-      
+
       // Sum hours for this specific day
       const dayLogs = logs.filter((log: any) => {
         const logDate = new Date(log.date || log.loggedDate);
         logDate.setHours(0, 0, 0, 0);
         return logDate.getTime() === date.getTime();
       });
-      
-      const dayHours = dayLogs.reduce((sum: number, log: any) => 
+
+      const dayHours = dayLogs.reduce((sum: number, log: any) =>
         sum + (log.hoursSpent || log.totalHours || 0), 0);
-      
+
       this.lastSevenDaysHours.push(parseFloat(dayHours.toFixed(2)));
     }
-    
+
     // Calculate weekly average
     const daysWithLogs = this.lastSevenDaysHours.filter(h => h > 0).length;
-    this.weeklyAverage = daysWithLogs > 0 
+    this.weeklyAverage = daysWithLogs > 0
       ? parseFloat((this.totalHoursLogged / daysWithLogs).toFixed(2))
       : 0;
-    
+
     // Update chart with new data
     this.updateChartData();
   }
-  
+
   /**
    * Initialize empty daily hours when no data available
    */
@@ -203,7 +203,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     const today = new Date();
     this.lastSevenDaysLabels = [];
     this.lastSevenDaysHours = [];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
@@ -211,9 +211,9 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       this.lastSevenDaysLabels.push(dateStr);
       this.lastSevenDaysHours.push(0);
     }
-    
+
     this.weeklyAverage = 0;
-    
+
     // Update chart with empty data
     this.updateChartData();
   }
@@ -235,17 +235,17 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Apply productivity data from API
    */
   private applyProductivityData(data: any) {
-    
+
     this.totalHoursLogged = parseFloat(data.totalHoursLogged) || 0;
     this.taskCompletionRate = parseInt(data.taskCompletionRate) || 0;
     this.efficiencyScore = parseInt(data.efficiencyScore) || 0;
-    
+
     // Completed tasks includes both 'Completed' and 'Approved' status
     // If API returns separate counts, sum them; otherwise use completedTasks
     const completedCount = parseInt(data.completedTasks) || 0;
     const approvedCount = parseInt(data.approvedTasks) || 0;
     this.completedTasks = completedCount + approvedCount;
-    
+
     this.totalTasks = parseInt(data.totalTasks) || 0;
     this.inProgressTasks = parseInt(data.inProgressTasks) || 0;
     this.pendingTasks = parseInt(data.pendingTasks) || 0;
@@ -295,14 +295,14 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Fallback: Load productivity data using local calculation
    */
   private loadProductivityDataFallback(currentUser: any) {
-    
+
     // Load time logs
     this.timeLogService.getLogs()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (logs: any[]) => {
           // Filter logs for current employee
-          const myLogs = logs.filter(log => 
+          const myLogs = logs.filter(log =>
             log.employee === currentUser.fullName || log.employeeId === currentUser.id
           );
 
@@ -400,13 +400,13 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     this.pendingTasks = tasks.filter((t: any) => t.status === 'Pending').length;
 
     // Calculate completion rate
-    this.taskCompletionRate = this.totalTasks > 0 
+    this.taskCompletionRate = this.totalTasks > 0
       ? Math.round((this.completedTasks / this.totalTasks) * 100)
       : 0;
 
     // Calculate efficiency score (completed + in-progress / total)
     const activeAndCompleted = this.completedTasks + this.inProgressTasks;
-    this.efficiencyScore = this.totalTasks > 0 
+    this.efficiencyScore = this.totalTasks > 0
       ? Math.round((activeAndCompleted / this.totalTasks) * 100)
       : 0;
 
@@ -427,7 +427,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Refresh charts after data is loaded
    */
   private refreshCharts() {
-    
+
     // Destroy existing charts if they exist
     if (this.barChartInstance) {
       this.barChartInstance.destroy();
@@ -449,7 +449,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
    * Update chart data without recreating the charts
    */
   private updateChartData() {
-    
+
     // Update bar chart if it exists
     if (this.barChartInstance) {
       this.barChartInstance.data.labels = this.lastSevenDaysLabels;
@@ -457,7 +457,7 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       this.barChartInstance.update();
     } else {
     }
-    
+
     // Update pie chart if it exists
     if (this.pieChartInstance) {
       this.pieChartInstance.data.datasets[0].data = [
@@ -477,7 +477,13 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
     if (!this.barChartCanvas) {
       return;
     }
-    
+
+    // Always destroy existing chart instance before creating a new one
+    if (this.barChartInstance) {
+      this.barChartInstance.destroy();
+      this.barChartInstance = null;
+    }
+
     // Initialize with empty data if not yet loaded
     const labels = this.lastSevenDaysLabels.length > 0 ? this.lastSevenDaysLabels : ['Loading...'];
     const data = this.lastSevenDaysHours.length > 0 ? this.lastSevenDaysHours : [0];
@@ -494,8 +500,8 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
           borderSkipped: false
         }]
       },
-      options: { 
-        responsive: true, 
+      options: {
+        responsive: true,
         maintainAspectRatio: false,
         indexAxis: 'x',
         scales: {
@@ -526,6 +532,12 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       return;
     }
 
+    // Always destroy existing chart instance before creating a new one
+    if (this.pieChartInstance) {
+      this.pieChartInstance.destroy();
+      this.pieChartInstance = null;
+    }
+
     this.pieChartInstance = new Chart(this.pieChartCanvas.nativeElement, {
       type: 'doughnut',
       data: {
@@ -541,8 +553,8 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
           borderWidth: 2
         }]
       },
-      options: { 
-        responsive: true, 
+      options: {
+        responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
@@ -552,12 +564,12 @@ export class PersonalreportsComponent implements OnInit, AfterViewInit, OnDestro
       }
     });
   }
-  
+
   ngOnDestroy() {
     // Unsubscribe from all subscriptions
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     // Destroy chart instances
     if (this.barChartInstance) {
       this.barChartInstance.destroy();

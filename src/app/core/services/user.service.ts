@@ -42,6 +42,22 @@ export class UserService {
     this.loadUsers();
   }
 
+  /**
+   * Get user role from localStorage to determine API access
+   */
+  private getUserRoleFromStorage(): string {
+    try {
+      const userSession = localStorage.getItem('user_session');
+      if (userSession) {
+        const user = JSON.parse(userSession);
+        return user?.role || 'Employee';
+      }
+    } catch (e) {
+      console.warn('Failed to get user role from storage');
+    }
+    return 'Employee';
+  }
+
   // ---------------------------
   // Auth Headers
   // ---------------------------
@@ -111,6 +127,15 @@ export class UserService {
   // ---------------------------
 
   private loadUsers(): void {
+    // Only fetch users if current user is Admin or Manager
+    // Employees can't access /api/User/all and will get 403 Forbidden
+    const userRole = this.getUserRoleFromStorage();
+    if (userRole !== 'Admin' && userRole !== 'Manager') {
+      // For employees, just load from cache
+      this.loadUsersFromStorage();
+      return;
+    }
+
     this.apiService.getUsers().subscribe({
       next: (response: any) => {
         // Normalize various possible backend response shapes
