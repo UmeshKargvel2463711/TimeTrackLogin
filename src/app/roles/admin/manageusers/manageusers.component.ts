@@ -47,14 +47,14 @@ export class ManageusersComponent implements OnInit {
   allUsers: User[] = [];
   filteredUsers: User[] = [];
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   ngOnInit() {
     // Subscribe to user changes - this will automatically update when users are refreshed
     this.userService.users$.subscribe((users: any[]) => {
       // Filter out null/undefined users from backend response
       const validUsers = users.filter(u => u != null && u.id != null);
-      
+
       // Transform users from UserService format to display format
       this.allUsers = validUsers.map(u => ({
         id: u.id,
@@ -71,7 +71,7 @@ export class ManageusersComponent implements OnInit {
       }));
       this.applySearch();
     });
-    
+
     // Initial refresh to get latest users from API
     this.userService.refreshUsers();
   }
@@ -190,11 +190,11 @@ export class ManageusersComponent implements OnInit {
 
       // Use UserService to handle the manager-employee relationships
       this.userService.assignEmployeesToManager(
-        this.selectedUser.id, 
-        newAssignedEmployees, 
+        this.selectedUser.id,
+        newAssignedEmployees,
         oldAssignedEmployees
       );
-      
+
       // Also update basic user data
       this.userService.updateUser(this.selectedUser.id, {
         fullName: this.selectedUser.fullName,
@@ -266,18 +266,18 @@ export class ManageusersComponent implements OnInit {
     const term = this.searchTerm.toLowerCase();
     this.filteredUsers = this.allUsers.filter(user => {
       // If search term exists, check if it matches any field
-      const matchesSearch = !term || 
+      const matchesSearch = !term ||
         user.fullName?.toLowerCase().includes(term) ||
         user.email.toLowerCase().includes(term) ||
         user.role.toLowerCase().includes(term) ||
         user.department?.toLowerCase().includes(term);
-      
+
       // Filter by role (if selected)
       const matchesRole = !this.roleFilter || user.role === this.roleFilter;
-      
+
       // Filter by department (if selected)
       const matchesDept = !this.deptFilter || user.department === this.deptFilter;
-      
+
       return matchesSearch && matchesRole && matchesDept;
     });
   }
