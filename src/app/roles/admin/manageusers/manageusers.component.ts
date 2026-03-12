@@ -151,7 +151,8 @@ export class ManageusersComponent implements OnInit {
       // Also update basic info
       this.userService.updateUser(this.selectedUser.id, {
         fullName: this.selectedUser.fullName,
-        department: this.selectedUser.department
+        department: this.selectedUser.department,
+        status: this.selectedUser.status as 'Active' | 'Inactive'
       });
     }
     // Handle role change: Manager -> Employee (Downgrade)
@@ -163,10 +164,10 @@ export class ManageusersComponent implements OnInit {
       }
       this.userService.updateUser(this.selectedUser.id, {
         fullName: this.selectedUser.fullName,
-        department: this.selectedUser.department
+        department: this.selectedUser.department,
+        status: this.selectedUser.status as 'Active' | 'Inactive'
       });
     }
-    // Handle Employee role (no role change or already Employee)
     else if (newRole === 'Employee') {
       const oldManagerId = originalUser?.managerId || '';
       const newManagerId = this.selectedUser.managerId || '';

@@ -39,6 +39,17 @@ export class NotificationService {
  
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
+      // Only start polling if user is already logged in
+      const userSession = localStorage.getItem('user_session');
+      if (userSession) {
+        this.startPolling();
+      }
+    }
+  }
+
+  /** Initialize polling when user logs in */
+  initializePolling(): void {
+    if (isPlatformBrowser(this.platformId)) {
       this.startPolling();
     }
   }
@@ -132,11 +143,27 @@ export class NotificationService {
  
   /** Get unread count (for badge) */
   getUnreadCount(): Observable<number> {
+    // Check if token exists before making request
+    const userSession = localStorage.getItem('user_session');
+    const token = localStorage.getItem('token');
+    
+    if (!userSession || !token) {
+      // No token available, return 0 without making request
+      return of(0);
+    }
+
     return this.http.get<{ count: number }>(`${this.apiUrl}/unread/count`)
       .pipe(
         map(response => response?.count || 0),
         tap(count => this.unreadCountSubject.next(count)),
         catchError(error => {
+          // Log error for debugging
+          if (error.status === 401) {
+            console.warn('🔐 NotificationService - Unauthorized (401). Token may be expired.');
+          } else if (error.status !== 0) {
+            // 0 means network error or request cancelled, don't log those
+            console.warn('⚠️ NotificationService - Error fetching unread count:', error.status);
+          }
           return of(0);
         })
       );

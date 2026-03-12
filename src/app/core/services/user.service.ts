@@ -316,20 +316,19 @@ export class UserService {
 
   /**
    * Delete a user
-   * If your ApiService has deleteUser(id), call it here. Otherwise this keeps local only.
+   * Calls the API endpoint to delete the user from the database
    */
   deleteUser(id: string) {
-    // If you have an API endpoint:
-    // this.apiService.deleteUser(id).subscribe({
-    //   next: () => this.refreshUsers(),
-    //   error: (err) => console.error('❌ Delete failed:', err)
-    // });
-
-    // Local fallback (current behavior)
-    const current = this.usersSubject.value;
-    const updated = current.filter(u => u.id !== id);
-    this.usersSubject.next(updated);
-    this.saveUsersToStorage(updated);
+    this.apiService.deleteUser(id).subscribe({
+      next: () => {
+        console.log('✅ User deleted successfully');
+        this.refreshUsers();
+      },
+      error: (err) => {
+        console.error('❌ Delete failed:', err);
+        alert('Failed to delete user. Please try again.');
+      }
+    });
   }
 
   // ---------------------------
