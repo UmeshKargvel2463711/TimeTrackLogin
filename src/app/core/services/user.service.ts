@@ -42,6 +42,22 @@ export class UserService {
     this.loadUsers();
   }
 
+  /**
+   * Get user role from localStorage to determine API access
+   */
+  private getUserRoleFromStorage(): string {
+    try {
+      const userSession = localStorage.getItem('user_session');
+      if (userSession) {
+        const user = JSON.parse(userSession);
+        return user?.role || 'Employee';
+      }
+    } catch (e) {
+      console.warn('Failed to get user role from storage');
+    }
+    return 'Employee';
+  }
+
   // ---------------------------
   // Auth Headers
   // ---------------------------
@@ -111,6 +127,15 @@ export class UserService {
   // ---------------------------
 
   private loadUsers(): void {
+    // Only fetch users if current user is Admin or Manager
+    // Employees can't access /api/User/all and will get 403 Forbidden
+    const userRole = this.getUserRoleFromStorage();
+    if (userRole !== 'Admin' && userRole !== 'Manager') {
+      // For employees, just load from cache
+      this.loadUsersFromStorage();
+      return;
+    }
+
     this.apiService.getUsers().subscribe({
       next: (response: any) => {
         // Normalize various possible backend response shapes
@@ -291,20 +316,19 @@ export class UserService {
 
   /**
    * Delete a user
-   * If your ApiService has deleteUser(id), call it here. Otherwise this keeps local only.
+   * Calls the API endpoint to delete the user from the database
    */
   deleteUser(id: string) {
-    // If you have an API endpoint:
-    // this.apiService.deleteUser(id).subscribe({
-    //   next: () => this.refreshUsers(),
-    //   error: (err) => console.error('❌ Delete failed:', err)
-    // });
-
-    // Local fallback (current behavior)
-    const current = this.usersSubject.value;
-    const updated = current.filter(u => u.id !== id);
-    this.usersSubject.next(updated);
-    this.saveUsersToStorage(updated);
+    this.apiService.deleteUser(id).subscribe({
+      next: () => {
+        console.log('✅ User deleted successfully');
+        this.refreshUsers();
+      },
+      error: (err) => {
+        console.error('❌ Delete failed:', err);
+        alert('Failed to delete user. Please try again.');
+      }
+    });
   }
 
   // ---------------------------

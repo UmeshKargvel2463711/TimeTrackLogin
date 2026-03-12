@@ -9,39 +9,6 @@ import { BreakService } from '../../../core/services/break.service';
 import { CreateTimeLogDto } from '../../../core/models/time-log.model';
 import { CreateBreakDto, EndBreakDto, BreakDisplayModel } from '../../../core/models/break.model';
 
-/**
- * BREAK TRACKING LIMITATION & DATABASE SCHEMA RECOMMENDATION:
- * 
- * Current Implementation:
- * - Individual break start/end times are only available during active sessions (in-memory)
- * - After page refresh, only activity names and cumulative breakDuration are restored from DB
- * - Active breaks can be resumed: if activity exists but totalHours is 0, break state is restored
- * - The breaks table shows total cumulative duration for all activities
- * 
- * Break Resume Logic:
- * - On page load/refresh, checks if there's an active session with activity but no endTime
- * - If detected, sets isOnBreak=true and restores the last activity from the activity list
- * - User can continue or end the break, updating the cumulative breakDuration
- * 
- * Recommended Database Schema Enhancement:
- * To preserve individual break details across sessions, add a separate Breaks table:
- * 
- * Table: Breaks
- *   - BreakId (PK, GUID)
- *   - TimeLogId (FK -> TimeLog.LogId)
- *   - Activity (string)
- *   - StartTime (TimeSpan or string HH:MM)
- *   - EndTime (TimeSpan or string HH:MM)
- *   - Duration (int, minutes)
- *   - CreatedAt (DateTime)
- * 
- * With this schema:
- *   - POST /api/Break on each "Start Break" action
- *   - PUT /api/Break/{id} on "End Break" to update EndTime and Duration
- *   - GET /api/TimeLog/{id}/breaks to retrieve all breaks for a time log
- *   - Breaks table would show actual start/end times even after refresh
- */
-
 interface TimeLog {
   date: string;
   startTime: string;
@@ -50,8 +17,6 @@ interface TimeLog {
   totalHours: string;
   activity: string;
 }
-
-// Using BreakDisplayModel from break.model.ts
 
 @Component({
   selector: 'app-log-hours',
@@ -130,9 +95,7 @@ export class LogHoursComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Single capture function for all actions (state-driven)
-   */
+  //Single capture function for all actions (state-driven)//
   onCapture(): void {
     const now = new Date();
     const currentTime = this.formatTimeWithAMPM(now);
@@ -332,9 +295,7 @@ export class LogHoursComponent implements OnInit, OnDestroy {
     this.notificationService.error('Please select an action to capture');
   }
 
-  /**
-   * Format time with AM/PM
-   */
+  // Format time with AM/PM //
   private formatTimeWithAMPM(date: Date): string {
     let hours = date.getHours();
     const minutes = date.getMinutes();

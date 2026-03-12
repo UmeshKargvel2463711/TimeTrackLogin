@@ -1,7 +1,6 @@
 <div class="user-management-tab">
     <div class="user-stats-grid">
-        @for (item of stats; track item.label) {
-        <div class="stat-card">
+        <div class="stat-card" *ngFor="let item of stats">
             <div class="stat-info">
                 <span class="label">{{ item.label }}</span>
                 <h2 class="value">{{ item.value }}</h2>
@@ -10,40 +9,30 @@
                 <i [class]="item.icon"></i>
             </div>
         </div>
-        }
     </div>
- 
+
     <!-- Tabs Navigation -->
     <div class="tabs-navigation">
-        <button
-            class="tab-button"
-            [class.active]="activeTab === 'My Tasks'"
-            (click)="activeTab = 'My Tasks'">
+        <button class="tab-button" [class.active]="activeTab === 'My Tasks'" (click)="activeTab = 'My Tasks'">
             <i class="fas fa-tasks"></i> My Tasks
         </button>
-        <button
-            class="tab-button"
-            [class.active]="activeTab === 'Approvals'"
-            (click)="activeTab = 'Approvals'">
+        <button class="tab-button" [class.active]="activeTab === 'Approvals'" (click)="activeTab = 'Approvals'">
             <i class="fas fa-check-circle"></i> Approvals
         </button>
     </div>
- 
+
     <!-- My Tasks Tab -->
-    @if (activeTab === 'My Tasks') {
-    <div class="user-management-section">
+    <div class="user-management-section" *ngIf="activeTab === 'My Tasks'">
         <h3 class="title">My Tasks</h3>
- 
+
         <!-- Loading State -->
-        @if (isLoadingTasks) {
-        <div class="text-center py-4">
+        <div class="text-center py-4" *ngIf="isLoadingTasks">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
             <p class="text-muted mt-2">Loading tasks...</p>
         </div>
-        }
- 
+
         <!-- Task List using *ngFor -->
         <div class="task-list" *ngIf="!isLoadingTasks">
             <div class="task-item" *ngFor="let task of getMyActiveTasks()">
@@ -66,11 +55,9 @@
                             'bg-secondary': task.status === 'Pending'
                         }">{{ task.status }}</span>
                         <!-- Rejected badge if task was rejected -->
-                        @if (task.isRejected) {
-                        <span class="badge bg-danger">
+                        <span class="badge bg-danger" *ngIf="task.isRejected">
                             <i class="fas fa-times-circle"></i> Needs Revision
                         </span>
-                        }
                         <!-- Priority badge -->
                         <span class="badge" [ngClass]="{
                             'bg-danger': task.priority === 'High',
@@ -82,44 +69,43 @@
                 <div class="task-description">
                     {{ task.description }}
                 </div>
-                @if (task.isRejected && task.rejectionReason) {
-                <div class="alert alert-danger mt-2 mb-2" style="font-size: 0.875rem;">
+                <div class="alert alert-danger mt-2 mb-2" style="font-size: 0.875rem;"
+                    *ngIf="task.isRejected && task.rejectionReason">
                     <strong><i class="fas fa-exclamation-triangle"></i> Manager's Feedback:</strong>
                     <p class="mb-0 mt-1">{{ task.rejectionReason }}</p>
-                    <small class="text-muted mt-1 d-block"><strong>Action Required:</strong> Please address this feedback and complete the task again.</small>
+                    <small class="text-muted mt-1 d-block"><strong>Action Required:</strong> Please address this
+                        feedback and complete the task again.</small>
                 </div>
-                }
                 <div class="task-details">
                     <span><i class="fas fa-hourglass"></i> Est: {{ task.estimatedHours || 0 }}h</span>
                     @if (task.actualHours) {
                     <span><i class="fas fa-clock"></i> Actual: {{ task.actualHours }}h</span>
                     }
-                    <span *ngIf="task.dueDate"><i class="fas fa-calendar"></i> {{ task.dueDate | date: 'MMM dd, yyyy' }}</span>
-                    @if (task.isOverdue) {
-                    <span class="badge bg-danger text-white"><i class="fas fa-exclamation-triangle"></i> OVERDUE</span>
-                    }
-                    @if (task.daysUntilDue !== undefined && task.daysUntilDue <= 3 && task.daysUntilDue > 0 && !task.isOverdue) {
-                    <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Due in {{ task.daysUntilDue }} days</span>
-                    }
+                    <span *ngIf="task.dueDate"><i class="fas fa-calendar"></i> {{ task.dueDate | date: 'MMM dd, yyyy'
+                        }}</span>
+                    <span class="badge bg-danger text-white" *ngIf="task.isOverdue"><i
+                            class="fas fa-exclamation-triangle"></i> OVERDUE</span>
+                    <span class="badge bg-warning text-dark"
+                        *ngIf="task.daysUntilDue !== undefined && task.daysUntilDue <= 3 && task.daysUntilDue > 0 && !task.isOverdue"><i
+                            class="fas fa-clock"></i> Due in {{ task.daysUntilDue }} days</span>
                 </div>
                 <!-- Progress Bar: Estimated vs Actual Hours -->
-                @if (task.estimatedHours && task.actualHours !== undefined) {
-                <div class="progress-container">
+                <div class="progress-container" *ngIf="task.estimatedHours && task.actualHours !== undefined">
                     <div class="progress-info">
-                        <span>Hours Progress: {{ task.actualHours }} / {{ task.estimatedHours }} ({{ (task.actualHours / task.estimatedHours * 100) | number:'1.0-0' }}%)</span>
+                        <span>Hours Progress: {{ task.actualHours }} / {{ task.estimatedHours }} ({{ (task.actualHours /
+                            task.estimatedHours * 100) | number:'1.0-0' }}%)</span>
                     </div>
                     <div class="progress-bar-bg">
-                        <div class="progress-fill" 
-                          [ngClass]="{
+                        <div class="progress-fill" [ngClass]="{
                             'bg-danger': (task.actualHours / task.estimatedHours) > 1.2,
                             'bg-warning': (task.actualHours / task.estimatedHours) > 1 && (task.actualHours / task.estimatedHours) <= 1.2,
                             'bg-success': (task.actualHours / task.estimatedHours) <= 1
                           }"
-                          [style.width.%]="(task.actualHours / task.estimatedHours * 100 > 100 ? 100 : task.actualHours / task.estimatedHours * 100)"></div>
+                            [style.width.%]="(task.actualHours / task.estimatedHours * 100 > 100 ? 100 : task.actualHours / task.estimatedHours * 100)">
+                        </div>
                     </div>
                 </div>
-                } @else {
-                <div class="progress-container">
+                <div class="progress-container" *ngIf="!(task.estimatedHours && task.actualHours !== undefined)">
                     <div class="progress-info">
                         <span>Task Progress</span>
                     </div>
@@ -127,28 +113,23 @@
                         <div class="progress-fill" [style.width.%]="getProgressPercentage(task.status)"></div>
                     </div>
                 </div>
-                }
                 <div class="task-actions">
                     <!-- Start Button (only for Pending tasks) -->
-                    <button
-                        class="btn-start-task"
-                        (click)="onStartTask(task)"
+                    <button class="btn-start-task" (click)="onStartTask(task)"
                         [disabled]="task.status !== 'Pending' && task.canStart === false"
                         [title]="task.status !== 'Pending' ? 'Task already started or completed' : 'Click to start this task'">
                         <i class="fas fa-play-circle"></i> Start
                     </button>
 
                     <!-- Complete Button (only for In Progress tasks) -->
-                    <button
-                        class="btn-complete-task"
-                        (click)="openCompletionModalFromTask(task)"
+                    <button class="btn-complete-task" (click)="openCompletionModalFromTask(task)"
                         [disabled]="(task.status !== 'InProgress' && task.status !== 'In Progress') || task.canComplete === false"
                         [title]="task.status === 'InProgress' || task.status === 'In Progress' ? 'Click to mark as completed' : 'Task must be started first'">
                         <i class="fas fa-check-circle"></i> Complete
                     </button>
                 </div>
             </div>
- 
+
             <!-- Empty State -->
             <div class="no-tasks-message" *ngIf="getMyActiveTasks().length === 0">
                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
@@ -157,16 +138,13 @@
             </div>
         </div>
     </div>
-    }
 
     <!-- Approvals Tab -->
-    @if (activeTab === 'Approvals') {
-    <div class="user-management-section">
+    <div class="user-management-section" *ngIf="activeTab === 'Approvals'">
         <h3 class="title">Task Approvals</h3>
 
         <div class="task-list">
-            @for (task of getApprovalTasks(); track task.taskId || task.id) {
-            <div class="task-item">
+            <div class="task-item" *ngFor="let task of getApprovalTasks()">
                 <div class="task-header">
                     <div class="task-info">
                         <span class="task-name">
@@ -179,19 +157,15 @@
                         </span>
                     </div>
                     <div class="task-meta">
-                        @if (task.status === 'Completed') {
-                        <span class="badge bg-warning text-dark">
+                        <span class="badge bg-warning text-dark" *ngIf="task.status === 'Completed'">
                             <i class="fas fa-clock"></i> Awaiting Approval
                         </span>
-                        } @else if (task.status === 'Approved') {
-                        <span class="badge bg-success">
+                        <span class="badge bg-success" *ngIf="task.status === 'Approved'">
                             <i class="fas fa-check-circle"></i> Approved
                         </span>
-                        } @else if (task.isRejected) {
-                        <span class="badge bg-danger">
+                        <span class="badge bg-danger" *ngIf="task.isRejected">
                             <i class="fas fa-times-circle"></i> Rejected
                         </span>
-                        }
                         <span class="badge" [ngClass]="{
                             'bg-danger': task.priority === 'High',
                             'bg-warning text-dark': task.priority === 'Medium',
@@ -202,46 +176,36 @@
                 <div class="task-description">
                     {{ task.description }}
                 </div>
-                @if (task.isRejected && task.rejectionReason) {
-                <div class="alert alert-danger mt-2 mb-2" style="font-size: 0.875rem;">
+                <div class="alert alert-danger mt-2 mb-2" style="font-size: 0.875rem;"
+                    *ngIf="task.isRejected && task.rejectionReason">
                     <strong><i class="fas fa-exclamation-triangle"></i> Rejection Reason:</strong>
                     <p class="mb-0 mt-1">{{ task.rejectionReason }}</p>
-                    <small class="text-muted mt-1 d-block">Please address this feedback and complete the task again.</small>
+                    <small class="text-muted mt-1 d-block">Please address this feedback and complete the task
+                        again.</small>
                 </div>
-                }
                 <div class="task-details">
                     <span><i class="fas fa-hourglass"></i> Est: {{ task.estimatedHours || 0 }}h</span>
-                    @if (task.actualHours) {
-                    <span><i class="fas fa-clock"></i> Actual: {{ task.actualHours }}h</span>
-                    }
-                    @if (task.completedDate) {
-                    <span><i class="fas fa-calendar-check"></i> Completed: {{ task.completedDate | date: 'MMM dd, yyyy' }}</span>
-                    }
-                    @if (task.approvedDate) {
-                    <span><i class="fas fa-check"></i> Approved: {{ task.approvedDate | date: 'MMM dd, yyyy' }}</span>
-                    }
-                    @if (task.approvedByUserName) {
-                    <span><i class="fas fa-user-check"></i> By: {{ task.approvedByUserName }}</span>
-                    }
+                    <span *ngIf="task.actualHours"><i class="fas fa-clock"></i> Actual: {{ task.actualHours }}h</span>
+                    <span *ngIf="task.completedDate"><i class="fas fa-calendar-check"></i> Completed: {{
+                        task.completedDate | date: 'MMM dd, yyyy' }}</span>
+                    <span *ngIf="task.approvedDate"><i class="fas fa-check"></i> Approved: {{ task.approvedDate | date:
+                        'MMM dd, yyyy' }}</span>
+                    <span *ngIf="task.approvedByUserName"><i class="fas fa-user-check"></i> By: {{
+                        task.approvedByUserName }}</span>
                 </div>
             </div>
-            }
 
             <!-- Empty State -->
-            @if (getApprovalTasks().length === 0) {
-            <div class="no-tasks-message">
+            <div class="no-tasks-message" *ngIf="getApprovalTasks().length === 0">
                 <i class="fas fa-clipboard-check fa-3x text-muted mb-3"></i>
                 <p>No approval history</p>
                 <small class="text-muted">Completed tasks will appear here for approval tracking.</small>
             </div>
-            }
         </div>
     </div>
-    }
 
     <!-- Task Completion Modal -->
-    @if (showSubmissionModal && selectedTask) {
-    <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-overlay" (click)="closeModal()" *ngIf="showSubmissionModal && selectedTask">
         <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h2>Mark Task as Completed</h2>
@@ -249,7 +213,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
- 
+
             <div class="modal-body">
                 <!-- Task Info -->
                 <div class="task-submission-info">
@@ -268,35 +232,24 @@
                         <span>{{ selectedTask.totalHours }} hours</span>
                     </div>
                 </div>
- 
+
                 <!-- Task Completion Form -->
                 <form class="submission-form">
                     <div class="form-group">
                         <label for="hoursSpent">Hours Spent</label>
-                        <input
-                            id="hoursSpent"
-                            type="number"
-                            [(ngModel)]="submissionForm.hoursSpent"
-                            name="hoursSpent"
-                            class="form-control"
-                            min="0"
-                            step="0.5"
-                            placeholder="Enter hours spent on this task">
+                        <input id="hoursSpent" type="number" [(ngModel)]="submissionForm.hoursSpent" name="hoursSpent"
+                            class="form-control" min="0" step="0.5" placeholder="Enter hours spent on this task">
                     </div>
- 
+
                     <div class="form-group">
                         <label for="comments">Completion Comments (Optional)</label>
-                        <textarea
-                            id="comments"
-                            [(ngModel)]="submissionForm.comments"
-                            name="comments"
-                            class="form-control"
-                            rows="4"
+                        <textarea id="comments" [(ngModel)]="submissionForm.comments" name="comments"
+                            class="form-control" rows="4"
                             placeholder="Add any comments about task completion..."></textarea>
                     </div>
                 </form>
             </div>
- 
+
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
                 <button class="btn btn-primary" (click)="onCompleteTask()">
@@ -305,6 +258,4 @@
             </div>
         </div>
     </div>
-    }
 </div>
- 

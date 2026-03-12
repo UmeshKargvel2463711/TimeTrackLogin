@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
+  private notificationService = inject(NotificationService);
 
   private readonly API_URL = 'https://localhost:7172/api/Auth';
 
@@ -21,6 +23,8 @@ export class AuthService {
       const savedUser = localStorage.getItem('user_session');
       if (savedUser) {
         this.currentUser.set(JSON.parse(savedUser));
+        // Initialize notification polling if user was already logged in
+        this.notificationService.initializePolling();
       }
     }
   }
@@ -38,6 +42,8 @@ export class AuthService {
   setCurrentUser(user: any) {
     this.currentUser.set(user);
     this.saveToStorage(user);
+    // Initialize notification polling after login
+    this.notificationService.initializePolling();
   }
 
   /**

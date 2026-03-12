@@ -1,6 +1,4 @@
-// ============================
-// Analytics Models - Team Analytics Backend Integration
-// ============================
+
 
 /**
  * Team Summary DTO - Dashboard summary cards

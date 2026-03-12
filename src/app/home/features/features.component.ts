@@ -12,7 +12,7 @@ export class FeaturesComponent {
     hoveredIndex: number | null = null;
 
   features = [
-    { title: 'Smart Time Tracking', desc: 'Effortlessly log work hours with our intuitive system. Automatic break calculations and overtime alerts.', icon: '🕒' },
+    { title: 'Time Tracking', desc: 'Effortlessly log work hours with our intuitive system.', icon: '🕒' },
     { title: 'Team Management', desc: 'Manage your entire workforce from a centralized dashboard. Assign tasks and optimize performance.', icon: '👥' },
     { title: 'Productivity Analytics', desc: 'Gain deep insights with comprehensive analytics and reporting. Identify trends and improve efficiency.', icon: '📊' },
     { title: 'Secure & Compliant', desc: 'Enterprise-grade security with role-based access control. Keep your data safe and compliant.', icon: '🔒' },

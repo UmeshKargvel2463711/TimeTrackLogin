@@ -101,13 +101,9 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
   @ViewChild('roleDistributionCanvas') roleDistributionCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('hoursByDeptCanvas') hoursByDeptCanvas?: ElementRef<HTMLCanvasElement>;
 
-    @ViewChild('tasksCompletedByDeptCanvas') tasksCompletedByDeptCanvas?: ElementRef<HTMLCanvasElement>;
-
   hoursTrendChart: any = null;
   roleChart: any = null;
   hoursByDeptChart: any = null;
-
-    tasksCompletedByDeptChart: any = null;
 
   constructor() {
     this.loadChartJS();
@@ -237,7 +233,7 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
         .filter(d => d.departmentName && d.departmentName.toLowerCase() !== 'it')
         .map(d => d.departmentName)
         .sort();
-      
+
       this.departmentRows = analyticsData.departmentMetrics
         .filter(d => d.departmentName && d.departmentName.toLowerCase() !== 'it')
         .map(dept => ({
@@ -366,8 +362,6 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
     this.createHoursTrendChart();
     this.createRoleDistributionChart();
     this.createHoursByDeptChart();
-
-      this.createTasksCompletedByDeptChart();
   }
 
   private updateCharts() {
@@ -385,56 +379,13 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
       this.hoursByDeptChart.data.datasets[0].data = this.departmentRows.map(r => r.totalHours);
       this.hoursByDeptChart.update();
     }
-
-      if (this.tasksCompletedByDeptChart) {
-        this.tasksCompletedByDeptChart.data.labels = this.departmentRows.map(r => r.department);
-        this.tasksCompletedByDeptChart.data.datasets[0].data = this.departmentRows.map(r => r.completedTasks);
-        this.tasksCompletedByDeptChart.update();
-      }
   }
 
   private destroyCharts() {
-      [this.hoursTrendChart, this.roleChart, this.hoursByDeptChart, this.tasksCompletedByDeptChart].forEach(chart => {
-        if (chart) chart.destroy();
-      });
-      this.hoursTrendChart = this.roleChart = this.hoursByDeptChart = this.tasksCompletedByDeptChart = null;
-  }
-  private createTasksCompletedByDeptChart() {
-    const canvas = this.tasksCompletedByDeptCanvas?.nativeElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    this.tasksCompletedByDeptChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: this.departmentRows.map(r => r.department),
-        datasets: [
-          {
-            label: 'Completed Tasks',
-            data: this.departmentRows.map(r => r.completedTasks),
-            backgroundColor: ['#6366f1', '#8cc63f', '#f59e0b', '#e57373', '#64b5f6', '#ffd54f', '#81c784'],
-            borderColor: '#fff',
-            borderWidth: 2
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { padding: 15, font: { size: 12 } }
-          },
-          title: {
-            display: true,
-            text: 'Tasks Completed by Department'
-          },
-          tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.8)', padding: 12, cornerRadius: 8 }
-        }
-      }
+    [this.hoursTrendChart, this.roleChart, this.hoursByDeptChart].forEach(chart => {
+      if (chart) chart.destroy();
     });
+    this.hoursTrendChart = this.roleChart = this.hoursByDeptChart = null;
   }
 
   private createHoursTrendChart() {
@@ -522,15 +473,17 @@ export class GeneratereportsComponent implements OnInit, AfterViewInit, OnDestro
         plugins: {
           legend: {
             position: 'right',
-            labels: { padding: 15, font: { size: 12 }, generateLabels: (chart: any) => {
-              const data = chart.data;
-              return (data.labels || []).map((label: string, i: number) => ({
-                text: `${label}: ${data.datasets[0].data[i]}`,
-                fillStyle: (data.datasets[0].backgroundColor as string[])[i],
-                hidden: false,
-                index: i
-              }));
-            }}
+            labels: {
+              padding: 15, font: { size: 12 }, generateLabels: (chart: any) => {
+                const data = chart.data;
+                return (data.labels || []).map((label: string, i: number) => ({
+                  text: `${label}: ${data.datasets[0].data[i]}`,
+                  fillStyle: (data.datasets[0].backgroundColor as string[])[i],
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
           },
           tooltip: { backgroundColor: 'rgba(31, 41, 55, 0.8)', padding: 12, cornerRadius: 8 }
         }

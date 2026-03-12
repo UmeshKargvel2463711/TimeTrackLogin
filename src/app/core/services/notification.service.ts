@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, timer, of } from 'rxjs';
 import { map, switchMap, tap, catchError } from 'rxjs/operators';
 import type { Notification } from '../models/notification.model';
- 
+
 // Toast notification interface
 export interface ToastNotification {
   id: string;
@@ -13,58 +13,69 @@ export interface ToastNotification {
   timestamp: Date;
   duration?: number;
 }
- 
+
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
- 
+
   // API URL - uses proxy to backend
   private apiUrl = '/api/Notification';
- 
+
   // ========= Persistent notifications (backend) =========
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
- 
+
   private notificationsSubject = new BehaviorSubject<Notification[]>([]);
   public notifications$ = this.notificationsSubject.asObservable();
- 
+
   // ========= Toast notifications (UI-only) =========
   toastNotifications = signal<ToastNotification[]>([]);
   private toastIdCounter = 0;
- 
+
   // (Optional) simple de-duplication window to avoid double toasts on fast clicks
   private recentMessages = new Map<string, number>();
   private readonly DEDUPE_MS = 1200;
- 
+
   constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      // Only start polling if user is already logged in
+      const userSession = localStorage.getItem('user_session');
+      if (userSession) {
+        this.startPolling();
+      }
+    }
+  }
+
+  /** Initialize polling when user logs in */
+  initializePolling(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.startPolling();
     }
   }
- 
+
   // ==================== TOAST NOTIFICATION METHODS (UI Feedback) ====================
- 
+
   /** Show a success toast */
   success(message: string, duration: number = 3000): void {
     this.addToast('success', message, duration);
   }
- 
+
   /** Show an error toast */
   error(message: string, duration: number = 4000): void {
     this.addToast('error', message, duration);
   }
- 
+
   /** Show a warning toast */
   warning(message: string, duration: number = 4000): void {
     this.addToast('warning', message, duration);
   }
- 
+
   /** Show an info toast */
   info(message: string, duration: number = 3000): void {
     this.addToast('info', message, duration);
   }
- 
+
   private addToast(
     type: 'success' | 'error' | 'warning' | 'info',
     message: string,
@@ -76,7 +87,7 @@ export class NotificationService {
     if (now - last < this.DEDUPE_MS) return;
     this.recentMessages.set(message, now);
     setTimeout(() => this.recentMessages.delete(message), this.DEDUPE_MS);
- 
+
     const toast: ToastNotification = {
       id: `toast_${this.toastIdCounter++}`,
       type,
@@ -84,27 +95,27 @@ export class NotificationService {
       timestamp: new Date(),
       duration
     };
- 
+
     const current = this.toastNotifications();
     // Prepend to show newest on top
     this.toastNotifications.set([toast, ...current]);
- 
+
     if (duration > 0) {
       setTimeout(() => this.removeToast(toast.id), duration);
     }
   }
- 
+
   removeToast(id: string): void {
     const current = this.toastNotifications();
     this.toastNotifications.set(current.filter(t => t.id !== id));
   }
- 
+
   clearAllToasts(): void {
     this.toastNotifications.set([]);
   }
- 
+
   // ==================== BACKEND API METHODS (Persistent Notifications) ====================
- 
+
   /** Get all notifications for current user */
   getUserNotifications(): Observable<Notification[]> {
     return this.http.get<Notification[]>(`${this.apiUrl}`)
@@ -115,7 +126,7 @@ export class NotificationService {
         })
       );
   }
- 
+
   /** Get only unread notifications */
   getUnreadNotifications(): Observable<Notification[]> {
     return this.http.get<Notification[]>(`${this.apiUrl}/unread`)
@@ -129,19 +140,35 @@ export class NotificationService {
         })
       );
   }
- 
+
   /** Get unread count (for badge) */
   getUnreadCount(): Observable<number> {
+    // Check if token exists before making request
+    const userSession = localStorage.getItem('user_session');
+    const token = localStorage.getItem('token');
+
+    if (!userSession || !token) {
+      // No token available, return 0 without making request
+      return of(0);
+    }
+
     return this.http.get<{ count: number }>(`${this.apiUrl}/unread/count`)
       .pipe(
         map(response => response?.count || 0),
         tap(count => this.unreadCountSubject.next(count)),
         catchError(error => {
+          // Log error for debugging
+          if (error.status === 401) {
+            console.warn('🔐 NotificationService - Unauthorized (401). Token may be expired.');
+          } else if (error.status !== 0) {
+            // 0 means network error or request cancelled, don't log those
+            console.warn('⚠️ NotificationService - Error fetching unread count:', error.status);
+          }
           return of(0);
         })
       );
   }
- 
+
   /** Mark a notification as read */
   markAsRead(notificationId: number): Observable<boolean> {
     return this.http.patch<any>(`${this.apiUrl}/${notificationId}/read`, {})
@@ -153,7 +180,7 @@ export class NotificationService {
         })
       );
   }
- 
+
   /** Mark all notifications as read */
   markAllAsRead(): Observable<boolean> {
     return this.http.patch<any>(`${this.apiUrl}/read-all`, {})
@@ -165,13 +192,13 @@ export class NotificationService {
         })
       );
   }
- 
+
   /** Refresh notifications and count */
   refreshNotifications(): void {
     this.getUnreadCount().subscribe();
     this.getUnreadNotifications().subscribe();
   }
- 
+
   /** Poll for new notifications every 30 seconds */
   private startPolling(): void {
     timer(0, 30000)
@@ -181,7 +208,7 @@ export class NotificationService {
       )
       .subscribe();
   }
- 
+
   /** Get notification icon based on type (for persistent/bell UI) */
   getNotificationIcon(type: string): string {
     const icons: { [key: string]: string } = {
@@ -197,7 +224,7 @@ export class NotificationService {
     };
     return icons[type] || '🔔';
   }
- 
+
   /** Get notification color based on type (for persistent/bell UI) */
   getNotificationColor(type: string): string {
     const colors: { [key: string]: string } = {
@@ -214,4 +241,4 @@ export class NotificationService {
     return colors[type] || 'secondary';
   }
 }
- 
+
