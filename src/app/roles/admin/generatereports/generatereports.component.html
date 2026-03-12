@@ -46,7 +46,8 @@
         <div class="kpi-content">
           <div class="kpi-label">Task Completion</div>
           <div class="kpi-value">{{ taskCompletion.completionRate }}%</div>
-          <div class="kpi-sub">{{ taskCompletion.completed }}/{{ taskCompletion.completed + taskCompletion.inProgress + taskCompletion.pending }}</div>
+          <div class="kpi-sub">{{ taskCompletion.completed }}/{{ taskCompletion.completed + taskCompletion.inProgress +
+            taskCompletion.pending }}</div>
         </div>
       </div>
     </div>
@@ -97,13 +98,6 @@
         <canvas #hoursByDeptCanvas></canvas>
       </div>
     </div>
-
-    <div class="chart-card">
-      <h3 class="chart-title">Tasks Completed by Department</h3>
-      <div class="chart-container">
-        <canvas #tasksCompletedByDeptCanvas></canvas>
-      </div>
-    </div>
   </section>
 
   <!-- Department Performance Table -->
@@ -141,7 +135,8 @@
         <div class="insight-icon">ℹ️</div>
         <div class="insight-content">
           <h4>Productivity Overview</h4>
-          <p>Organization has logged <strong>{{ formatHours(summary.totalHours) }} total hours</strong> with an average of <strong>{{ formatHours(summary.avgHoursPerEmployee) }} hours</strong> per employee.</p>
+          <p>Organization has logged <strong>{{ formatHours(summary.totalHours) }} total hours</strong> with an average
+            of <strong>{{ formatHours(summary.avgHoursPerEmployee) }} hours</strong> per employee.</p>
         </div>
       </div>
 
@@ -157,7 +152,8 @@
         <div class="insight-icon">⚠️</div>
         <div class="insight-content">
           <h4>Department Distribution</h4>
-          <p><strong>{{ departments.length }}</strong> departments with an average of <strong>{{ summary.avgEmployeesPerDept | number:'1.1-1' }}</strong> employees per department.</p>
+          <p><strong>{{ departments.length }}</strong> departments with an average of <strong>{{
+              summary.avgEmployeesPerDept | number:'1.1-1' }}</strong> employees per department.</p>
         </div>
       </div>
     </div>
